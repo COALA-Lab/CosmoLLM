@@ -1,0 +1,24 @@
+{
+    "name": "cyclic1",
+    "nwalkers": 20,
+    "nsteps": 5000,
+    "nchains": 4,
+    "parametrization": {
+        "name": "cyclic",
+        "param_names": ["g", "a_max", "m"]
+    },
+    "max_redshift": 1.0,
+    "cosmo": "default",
+    "fits_path": {
+        "fitres": "./Pantheon/data_fitres/Ancillary_G10.FITRES",
+        "sys": "./Pantheon/data_fitres/sys_full_long_G10.txt"
+    },
+    "truth_values": "data/hubbles.csv",
+    "priori": {
+        "matter": "gauss",
+        "hubble": "planck",
+        "m": "m_gaussian_priori",
+        "g": "g_gaussian_priori",
+        "a_max": "a_max_uniform_priori"
+    }
+}

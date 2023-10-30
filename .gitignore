@@ -1,0 +1,10 @@
+.env
+env
+venv
+.mcmc_cache
+.vscode
+.idea
+__pycache__
+*cache
+*.h5
+results
