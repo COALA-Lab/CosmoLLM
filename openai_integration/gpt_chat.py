@@ -21,7 +21,7 @@ class GPTChat:
             ]
         )
 
-        response = completion.choices[0].message
+        response = completion.choices[0].message.content
         self.history.append({"role": "assistant", "content": response})
 
         return response
