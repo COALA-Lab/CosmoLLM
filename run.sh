@@ -2,8 +2,6 @@
 
 set -eu
 
-. ./.env
-
 N_PROC=${3:-8}
 RESULTS_PATH=$2
 
