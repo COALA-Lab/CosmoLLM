@@ -1,13 +1,12 @@
-
 import openai
 
-import settings
+from . import settings
 
 
-class GPTChat:
+class ChatGPT:
     def __init__(self) -> None:
-        self.intro_prompt = settings.GPT_CHAT_INTRO_PROMPT
-        self.model = "gpt-3.5-turbo"  # settings.GPT_CHAT_MODEL
+        self.intro_prompt = settings.OPENAI_CHAT_GPT_INTRO_PROMPT
+        self.model = settings.OPENAI_CHAT_GPT_MODEL
         self.history = []
 
         openai.api_key = settings.OPENAI_API_KEY
@@ -26,9 +25,3 @@ class GPTChat:
         self.history.append({"role": "assistant", "content": response})
 
         return response
-
-
-gpt_chat = GPTChat()
-user_message = "this is the code of my function def bla(a,b):return a*b write me a code that calls this function for all numbers a=1..20 and b=3..40. also, the code must make a 3d plot of the returned results, with a on x-axis, b on y-axis and result on z axis."
-response = gpt_chat.send_message(user_message)
-print(response)
