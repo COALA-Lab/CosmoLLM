@@ -10,7 +10,7 @@ OPENAI_API_KEY = env.str("OPENAI_API_KEY")
 
 
 # GPT Chat
-GPT_CHAT_MODEL = env.str("GPT_CHAT_MODEL", "gpt-3.5-turbo")
+GPT_CHAT_MODEL = env.str("GPT_CHAT_MODEL", "text-davinci-003")
 GPT_CHAT_INTRO_PROMPT = env.str(
     "GPT_CHAT_INTRO_PROMPT",
     "You are an AI assistant knowledgeable in the use of 'CosmoLLM', a physics library written in Python. "
