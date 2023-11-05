@@ -1,4 +1,4 @@
-import fit_data
+from . import fit_data
 import numpy as np
 
 

@@ -4,11 +4,10 @@ from collections import namedtuple
 
 import numpy as np
 from astropy.cosmology import Planck15
-from astropy import units
 from astropy.cosmology.core import Cosmology
 
 from SNANA_StarterKit.util.txtobj import txtobj
-from SNANA_StarterKit.util.getmu import getmu, salt2mu
+from SNANA_StarterKit.util.getmu import getmu
 
 
 FitresDataPath = namedtuple("FitresDataPath", ["name", "id", "fitres", "sys_matrix"])

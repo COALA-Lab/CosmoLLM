@@ -63,4 +63,4 @@ def get_parametrization(name: str):
         raise ValueError("Name of parametrization cannot be None!")
     return reduce(_parametrization_if_exists,
             filter(lambda p: p.stem == name, _iter_parametrizations()),
-            None) 
+            None)

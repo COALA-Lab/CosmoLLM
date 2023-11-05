@@ -1,5 +1,12 @@
+import uuid
+from datetime import datetime
+
 from astropy import cosmology
 import pandas as pd
+
+
+def generate_experiment_id():
+    return f"{datetime.utcnow().isoformat()}_{uuid.uuid4()}"
 
 
 def get_cosmology(cosmology_name: str):

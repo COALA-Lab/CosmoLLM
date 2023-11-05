@@ -2,8 +2,6 @@ import numpy as np
 import astropy.cosmology as cosmology
 
 
-
-
 def _omega_r_calc_factory(cosmo: cosmology.FLRW):
     if cosmo.has_massive_nu:
         return lambda z: cosmo.Ogamma0 + cosmo.Ogamma0 * cosmo.nu_relative_density(z)
