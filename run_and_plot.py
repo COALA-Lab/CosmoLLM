@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import uuid
 from argparse import ArgumentParser
 import os
 import subprocess
@@ -36,16 +36,26 @@ def execute(workers: int, config_path: str, results_path: str, experiment_id: st
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('config_path', help="Path to the experiment's configuration file")
     parser.add_argument(
-        '--results-path',
+        '-c', '--config_path',
+        help="Path to the experiment's configuration file",
+        default='configs/config_quadratic_density.json'
+    )
+    parser.add_argument(
+        '-r', '--results-path',
         help='Path to the results directory, where the chains will be saved',
         default='/tmp/cosmo_llm_results/'
     )
-    parser.add_argument('--experiment-id', help='ID of the experiment', default=None)
     parser.add_argument(
-        "--workers",
-        help="Number of workers to use (must be greater or equal to nchains)", default=-1, type=int
+        '-i', '--experiment-id',
+        help='ID of the experiment', 
+        default=uuid.uuid4()
+    )
+    parser.add_argument(
+        '-n', '--workers',
+        help="Number of workers to use (must be greater or equal to nchains)", 
+        default=-1, 
+        type=int
     )
     parser.add_argument(
         '-q', '--quiet',
