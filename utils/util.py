@@ -1,12 +1,20 @@
 import uuid
 from datetime import datetime
+from pathlib import Path
+from typing import Type, Union
 
 from astropy import cosmology
 import pandas as pd
+from pydantic import BaseModel
 
 
-def generate_experiment_id():
+def generate_experiment_id() -> str:
     return f"{datetime.utcnow().isoformat()}_{uuid.uuid4()}"
+
+
+def load_model(model: Type[BaseModel], path: Union[str, Path]):
+    with open(path, "r") as f:
+        return model.model_validate_json(f.read())
 
 
 def get_cosmology(cosmology_name: str):

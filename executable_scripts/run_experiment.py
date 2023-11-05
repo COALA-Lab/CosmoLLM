@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
+
 import subprocess
 from pathlib import Path
 from argparse import ArgumentParser
 import traceback
+from sys import stdout
 
 import numpy as np
 import zeus
@@ -13,14 +15,31 @@ from priori import get_priori, PrioriContext
 from utils.fit_data import parse_fits
 from utils import chi
 from models.sampling_model import create_E_function
-from utils.util import get_cosmology, read_truth_values, generate_experiment_id
+from utils.util import get_cosmology, read_truth_values, generate_experiment_id, load_model
+
+density_fn = None
+E_fn = None
+H = None
+sigma = None
+chi_sn = None
+z = None
+prioris = None
 
 
 def log_priori(ctx: PrioriContext):
+    global prioris
+
     return sum(map(lambda prior: prior.eval(ctx), prioris))
 
 
 def log_posterior(params):
+    global density_fn
+    global E_fn
+    global H
+    global sigma
+    global chi_sn
+    global z
+
     omega_m = params[:, 0].reshape(1, -1)
     h = params[:, 1].reshape(1, -1)
     x = params[:, 2:].T
@@ -38,41 +57,27 @@ def log_posterior(params):
     )
 
 
-if __name__ == "__main__":
-    #############################
-    ##### ARGUMENT PARSING ######
-    #############################
+def execute(config_path: str, results_path: str, experiment_id: str, quiet: bool) -> None:
+    global density_fn
+    global E_fn
+    global H
+    global sigma
+    global chi_sn
+    global z
+    global prioris
 
-    parser = ArgumentParser()
-    parser.add_argument('config_path', help='Path to experiments configuration file')
-    parser.add_argument(
-        '--results-path',
-        help='Path to the results directory, where the chains will be saved',
-        default='/tmp/cosmo_llm_results/'
-    )
-    parser.add_argument('--experiment-id', help='ID of the experiment', default=None)
-    parser.add_argument(
-        '-q', '--quiet',
-        help='Turn off the progress bar.', action='store_true', default=False
-    )
-
-    args = parser.parse_args()
-    config = ExperimentConfig.parse_file(args.config_path)
-
-    #############################
-    ###### EXPERIMENT INIT ######
-    #############################
-
+    # Initialize the parametrization and prioris
+    config = load_model(ExperimentConfig, config_path)
     density_fn_factory = get_parametrization(config.parametrization.name)
     prioris = [
         get_priori(registry, priori) for registry, priori in config.priori.items()
     ]
 
-    experiment_id = args.experiment_id if args.experiment_id else generate_experiment_id()
-    results_path = Path(args.results_path)
+    experiment_id = experiment_id if experiment_id else generate_experiment_id()
+    results_path = Path(results_path)
     experiment_path = results_path / experiment_id
     subprocess.run(f"mkdir -p {experiment_path}", shell=True)
-    subprocess.run(f"cp {args.config_path} {experiment_path}/config.json", shell=True)
+    subprocess.run(f"cp {config_path} {experiment_path}/config.json", shell=True)
 
     max_redshift = config.max_redshift
     nwalkers = config.nwalkers
@@ -93,10 +98,7 @@ if __name__ == "__main__":
     nparams = density_fn.n_params
     ndims = 2 + nparams  # Add h and omega_m params
 
-    ###############################
-    ####### EXPERIMENT RUN ########
-    ###############################
-
+    # Run the experiment
     with zeus.ChainManager(config.nchains) as chain_manager:
         rank = chain_manager.rank
         chain_path = experiment_path / f'chain_{rank}.npy'
@@ -118,7 +120,7 @@ if __name__ == "__main__":
             sampler.run_mcmc(start,
                              nsteps,
                              callbacks=cb,
-                             progress=not args.quiet)
+                             progress=not quiet)
             if rank == 0 and cb:
                 print(f'R = {cb.estimates}')
             np.save(chain_path, sampler.get_chain())
@@ -126,3 +128,23 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Exception during experiment: {e}")
             traceback.print_exception()
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument('config_path', help='Path to experiments configuration file')
+    parser.add_argument(
+        '--results-path',
+        help='Path to the results directory, where the chains will be saved',
+        default='/tmp/cosmo_llm_results/'
+    )
+    parser.add_argument('--experiment-id', help='ID of the experiment', default=None)
+    parser.add_argument(
+        '-q', '--quiet',
+        help='Turn off the progress bar.', action='store_true', default=False
+    )
+
+    args = parser.parse_args()
+
+    # Execute experiment
+    execute(args.config_path, args.results_path, args.experiment_id, args.quiet)

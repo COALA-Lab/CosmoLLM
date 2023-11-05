@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import warnings
 from pathlib import Path
 from typing import Optional, List
 from argparse import ArgumentParser
@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from models.experiment_config import ExperimentConfig
 from parametrization import get_parametrization
-from utils.util import get_cosmology
+from utils.util import get_cosmology, load_model
 
 
 def plot_chains(n_dimensions: int,
@@ -46,26 +46,12 @@ def plot_density(X_fn, z, x_values):
 #    plt.legend()
 
 
-if __name__ == "__main__":
-    #############################
-    ##### ARGUMENT PARSING ######
-    #############################
-    parser = ArgumentParser()
-    parser.add_argument(
-        '--results-path',
-        help='Path to the results directory, where the chains will be saved',
-        default='/tmp/cosmo_llm_results/'
-    )
-    args = parser.parse_args()
+def execute(results_path: str) -> None:
+    warnings.filterwarnings("ignore")
 
-
-    #############################
-    ##### PLOT THE RESULTS ######
-    #############################
-
-    results_path = Path(args.results_path)
+    results_path = Path(results_path)
     config_path = results_path / 'config.json'
-    config = ExperimentConfig.parse_file(config_path)
+    config = load_model(ExperimentConfig, config_path)
 
     density_fn_factory = get_parametrization(config.parametrization.name)
     cosmo = get_cosmology(config.cosmo)
@@ -93,3 +79,18 @@ if __name__ == "__main__":
         plot_density(density_fn, z, chain_flat[:, 2:])
         plt.savefig(results_path / f'density_{rank}.png')
         plt.clf()
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument(
+        '--results-path',
+        help='Path to the results directory, where the chains will be saved',
+        default='/tmp/cosmo_llm_results/'
+    )
+    args = parser.parse_args()
+
+    # Plot the results
+    print("Plotting results...")
+    execute(args.results_path)
+    print("Done!")
