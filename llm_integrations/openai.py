@@ -24,4 +24,7 @@ class ChatGPT:
         response = completion.choices[0].message.content
         self.history.append({"role": "assistant", "content": response})
 
+        if len(self.history) > settings.HISTORY_LENGTH:
+            self.history.pop(0)
+
         return response

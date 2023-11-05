@@ -9,6 +9,7 @@ env.read_env()
 
 # General
 OPENAI_API_KEY = env.str("OPENAI_API_KEY")
+HISTORY_LENGTH = env.int("HISTORY_LENGTH", 20)
 
 
 # OpenAI
