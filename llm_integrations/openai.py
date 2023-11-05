@@ -28,3 +28,13 @@ class ChatGPT:
             self.history.pop(0)
 
         return response
+
+    def generate_parametrization_class(self, message: str) -> str:
+        completion = openai.ChatCompletion.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": settings.PARAMETRIZATION_GENERATION_SYSTEM_PROMPT},
+                {"role": "user", "content": message}
+            ]
+        )
+        return completion.choices[0].message.content
