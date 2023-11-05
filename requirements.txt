@@ -29,3 +29,5 @@ pydantic==2.4.2
 openai==0.28.1
 environs==9.5.0
 langchain==0.0.329
+flake8==6.1.0
+mypy==1.6.1
