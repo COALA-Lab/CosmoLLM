@@ -7,8 +7,11 @@ import subprocess
 from models.experiment_config import ExperimentConfig
 from utils.util import generate_experiment_id, load_model
 
+import executable_scripts.plot_graphs as plotter
+
 
 def execute(workers: int, config_path: str, results_path: str, experiment_id: str, quiet: bool) -> None:
+    # Run the experiment
     subprocess_env = os.environ.copy()
     subprocess_env["PYTHONPATH"] = os.getcwd()
 
@@ -23,12 +26,9 @@ def execute(workers: int, config_path: str, results_path: str, experiment_id: st
         raise RuntimeError("Experiment failed!")
 
     # Plot the results
-    command = (
-        f"python3 executable_scripts/plot_graphs.py --results-path {results_path}/{experiment_id}"
-    )
-    result = subprocess.run(command, shell=True, env=subprocess_env, cwd=os.getcwd())
-    if result.returncode != 0:
-        raise RuntimeError("Plotting failed!")
+    print("Plotting results...")
+    plotter.execute(f"{results_path}/{experiment_id}")
+    print("Done!")
 
     # TODO: Extract results into csv
     # Add density evaluation with different parameter values

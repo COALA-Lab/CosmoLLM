@@ -46,10 +46,10 @@ def plot_density(X_fn, z, x_values):
 #    plt.legend()
 
 
-def execute(results_path: str) -> None:
+def execute(experiment_path: str) -> None:
     warnings.filterwarnings("ignore")
 
-    results_path = Path(results_path)
+    results_path = Path(experiment_path)
     config_path = results_path / 'config.json'
     config = load_model(ExperimentConfig, config_path)
 
@@ -84,13 +84,12 @@ def execute(results_path: str) -> None:
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument(
-        '--results-path',
-        help='Path to the results directory, where the chains will be saved',
-        default='/tmp/cosmo_llm_results/'
+        'experiment_path',
+        help='Path to the experiment results directory, where the chains will be saved',
     )
     args = parser.parse_args()
 
     # Plot the results
     print("Plotting results...")
-    execute(args.results_path)
+    execute(args.experiment_path)
     print("Done!")
