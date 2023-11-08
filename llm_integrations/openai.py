@@ -1,5 +1,7 @@
 import openai
 
+from llm_integrations.utils import is_valid_python_code, save_parametrization_class
+
 from . import settings
 
 
@@ -29,7 +31,7 @@ class ChatGPT:
 
         return response
 
-    def generate_parametrization_class(self, message: str) -> str:
+    def _generate_parametrization_class(self, message: str) -> str:
         completion = openai.ChatCompletion.create(
             model=self.model,
             messages=[
@@ -38,3 +40,10 @@ class ChatGPT:
             ]
         )
         return completion.choices[0].message.content
+    
+    def handle_parametrization_generation(self, message: str):
+        response = self._generate_parametrization_class(message)
+        if not is_valid_python_code(response):
+            return 'Failed to generate code'
+        save_parametrization_class(response)
+        return response

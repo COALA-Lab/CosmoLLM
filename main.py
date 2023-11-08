@@ -11,6 +11,7 @@ def execute():
             break
 
         response = agent.send_message(user_input)
+        # response = agent.handle_parametrization_generation(user_input)
         print("Bot: " + response)
 
 

@@ -7,7 +7,7 @@ class Cyclic2:
 
     @classmethod
     def create(cls, cosmo, max_redshift) -> 'BaseParametrization':
-        return Cyclic()
+        return Cyclic2()
 
     def eval(self, z: np.ndarray, params: np.ndarray) -> np.ndarray:
         g = params[0, :].astype(np.float128)

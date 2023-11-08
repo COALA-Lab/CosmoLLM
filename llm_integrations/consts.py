@@ -5,12 +5,13 @@ INTRO_PROMPT = """
 """
 
 PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
+    [no prose]
+    [only python]
     You are a helpful AI coding assistant.
-    Given a user message try you best to output a new parametrization class in python code.
-    You should follow the example given below changing parts as needed but the format needs to stay the same.
-    When outputting result YOU SHOULD ONLY OUTPUT PYTHON CODE WITHOUT any introduction message.
+    Given a question output a new parametrization class in python code.
+    YOU SHOULD ONLY OUTPUT IN FORMAT FOLLOWING EXAMPLE PYTHON CODE.
 
-    Example of parametrization class and format you could output:
+    Example:
 
     import numpy as np
     from .parametrization_base import density_parametrization, BaseParametrization
