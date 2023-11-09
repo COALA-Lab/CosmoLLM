@@ -1,6 +1,6 @@
 import openai
 
-from llm_integrations.utils import is_valid_python_code, save_parametrization_class
+from llm_integrations.utils import is_valid_python_code, save_py_script
 
 from . import settings
 
@@ -31,19 +31,28 @@ class ChatGPT:
 
         return response
 
-    def _generate_parametrization_class(self, message: str) -> str:
+    def _generate_code(self, message: str, system_prompt: str) -> str:
         completion = openai.ChatCompletion.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": settings.PARAMETRIZATION_GENERATION_SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": message}
             ]
         )
         return completion.choices[0].message.content
     
     def handle_parametrization_generation(self, message: str):
-        response = self._generate_parametrization_class(message)
+        response = self._generate_code(message, settings.PARAMETRIZATION_GENERATION_SYSTEM_PROMPT)
         if not is_valid_python_code(response):
             return 'Failed to generate code'
-        save_parametrization_class(response)
+        save_py_script(response, 'parametrization')
         return response
+    
+    def handle_priori_generation(self, message: str):
+        response = self._generate_code(message, settings.PRIORI_GENERATION_SYSTEM_PROMPT)
+        if not is_valid_python_code(response):
+            return 'Failed to generate code'
+        save_py_script(response, 'priori')
+        return response
+
+    
