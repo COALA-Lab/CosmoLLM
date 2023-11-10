@@ -49,7 +49,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-i', '--experiment-id',
         help='ID of the experiment', 
-        default=uuid.uuid4()
+        default=generate_experiment_id()
     )
     parser.add_argument(
         '-n', '--workers',
