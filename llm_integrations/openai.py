@@ -55,4 +55,9 @@ class ChatGPT:
         save_py_script(response, 'priori')
         return response
 
-    
+    def handle_function_generation(self, message: str):
+        response = self._generate_code(message, settings.PRIORI_GENERATION_SYSTEM_PROMPT)
+        if not is_valid_python_code(response):
+            return 'Failed to generate code'
+        save_py_script(response, 'equations')
+        return response
