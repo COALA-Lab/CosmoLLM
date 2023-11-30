@@ -2,6 +2,8 @@ import numpy as np
 import astropy.cosmology as cosmology
 
 
+# TODO: clean up unused code
+
 def _omega_r_calc_factory(cosmo: cosmology.FLRW):
     if cosmo.has_massive_nu:
         return lambda z: cosmo.Ogamma0 + cosmo.Ogamma0 * cosmo.nu_relative_density(z)
@@ -15,7 +17,7 @@ class _EFunc:
         self._omega_r_fn = _omega_r_calc_factory(cosmo)
         self._cosmo = cosmo
         self._omega_m = self._cosmo.Om0
-    
+
     def __call__(self, z: np.ndarray, density_value) -> np.ndarray:
         omega_r = self._omega_r_fn(z)
         z_plus_one = z + 1
@@ -29,9 +31,8 @@ class _EFunc:
 
 
 def create_E_function(cosmo: cosmology.FLRW):
-    #    omega_r_fn = _omega_r_calc_factory(cosmo)
+    # omega_r_fn = _omega_r_calc_factory(cosmo)
 
     return _EFunc(cosmo)
 
-#    return _E_func
-
+    # return _E_func

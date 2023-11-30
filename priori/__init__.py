@@ -4,7 +4,7 @@ import sys
 import glob
 import inspect
 
-from .priori_base import PrioriFunction, PrioriContext
+from .priori_base import PrioriFunction
 
 PRIORIS_DIRECTORY = Path(__file__).parent.absolute()
 _IGNORE_FILES = {"__init__.py", "priori_base.py"}

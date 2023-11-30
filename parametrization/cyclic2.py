@@ -2,6 +2,8 @@ import numpy as np
 from .parametrization_base import density_parametrization, BaseParametrization
 
 
+# TODO: clean up unused code
+
 @density_parametrization('cyclic', 3)
 class Cyclic2:
 

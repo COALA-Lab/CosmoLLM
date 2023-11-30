@@ -32,6 +32,7 @@ PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
                 (2 * (z ** 2) * (2 * x[0] - x[1] - 1)) / (self.max_redshift ** 2))
             return 1 + linear_part - quadratic_part
 """
+
 PRIORI_GENERATION_SYSTEM_PROMPT = """
     [no prose]
     [only python]
@@ -58,11 +59,15 @@ PRIORI_GENERATION_SYSTEM_PROMPT = """
             self.params = params
 
         def __repr__(self) -> str:
-            return f'PrioriContext(hubble={self.hubble}, omega_m={self.omega_m}, density={self.density}, params={self.params})'
+            return (
+                f'PrioriContext('
+                f'hubble={self.hubble}, omega_m={self.omega_m}, density={self.density}, params={self.params}'
+                f')'
+            )
 
     class PrioriFunction:
         pass
-        
+
     def priori(of_name: str):
         def _decorator(fn):
             class _PrioriFn(PrioriFunction):
@@ -89,16 +94,15 @@ PRIORI_GENERATION_SYSTEM_PROMPT = """
     @priori('uniform_around_zero')
     def uniform_around_zero(context: PrioriContext):
         return uniform(context.density, -0.2, 0.2)
-        
+
     2nd example:
     from .priori_base import priori, PrioriContext, uniform, gaussian
 
     @priori('planck')
     def planck_h_prior(context: PrioriContext):
         return gaussian(context.hubble, 67.5 / 100., 1.5 / 100.)
-
-    
 """
+
 # LangChain
 LANGCHAIN_MEMORY_KEY = "chat_memory"
 LANGCHAIN_HUMAN_MESSAGE_KEY = "human_message"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import uuid
+
 from argparse import ArgumentParser
 import os
 import subprocess
@@ -31,7 +31,7 @@ def execute(workers: int, config_path: str, results_path: str, experiment_id: st
     print("Done!")
 
     # TODO: Extract results into csv
-    # Add density evaluation with different parameter values
+    # TODO: Add density evaluation with different parameter values
 
 
 if __name__ == "__main__":
@@ -48,13 +48,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '-i', '--experiment-id',
-        help='ID of the experiment', 
+        help='ID of the experiment',
         default=generate_experiment_id()
     )
     parser.add_argument(
         '-n', '--workers',
-        help="Number of workers to use (must be greater or equal to nchains)", 
-        default=-1, 
+        help="Number of workers to use (must be greater or equal to nchains)",
+        default=-1,
         type=int
     )
     parser.add_argument(

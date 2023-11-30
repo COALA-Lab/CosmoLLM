@@ -2,7 +2,6 @@ from typing import Callable
 
 import numpy as np
 
-
 HubbleDensityFunc_T = Callable[[np.ndarray], np.ndarray]
 
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import warnings
 from pathlib import Path
 from typing import Optional, List
@@ -12,6 +13,8 @@ from models.experiment_config import ExperimentConfig
 from parametrization import get_parametrization
 from utils.util import get_cosmology, load_model
 
+
+# TODO: clean up unused code
 
 def plot_chains(n_dimensions: int,
                 chain,
@@ -43,7 +46,7 @@ def plot_density(X_fn, z, x_values):
     plt.xlabel('Z')
     plt.ylabel('X (density)')
     plt.title('Density')
-#    plt.legend()
+    # plt.legend()
 
 
 def execute(experiment_path: str) -> None:
@@ -56,7 +59,7 @@ def execute(experiment_path: str) -> None:
     density_fn_factory = get_parametrization(config.parametrization.name)
     cosmo = get_cosmology(config.cosmo)
     density_fn = density_fn_factory.create(cosmo, config.max_redshift)
-    #_, z, _ = read_truth_values(config.max_redshift, config.truth_values)
+    # _, z, _ = read_truth_values(config.max_redshift, config.truth_values)
 
     z = np.linspace(0, config.max_redshift, 100).reshape(-1, 1)
 

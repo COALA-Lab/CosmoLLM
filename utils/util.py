@@ -21,7 +21,8 @@ def get_cosmology(cosmology_name: str):
     if cosmology_name.lower() == "default":
         return cosmology.default_cosmology.get()
     else:
-        # Validate is actually get by name for some reason?
+        # TODO: investigate this
+        # Validate is actually get by name for some reason
         return cosmology.default_cosmology.validate(cosmology_name)
 
 

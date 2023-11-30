@@ -9,7 +9,6 @@ from astropy.cosmology.core import Cosmology
 from SNANA_StarterKit.util.txtobj import txtobj
 from SNANA_StarterKit.util.getmu import getmu
 
-
 FitresDataPath = namedtuple("FitresDataPath", ["name", "id", "fitres", "sys_matrix"])
 """
 Paths to the systematic matrix and the FITRES data file.
@@ -37,10 +36,10 @@ def load_sys_from_file(path: Union[str, Path], dtype=np.float64) -> np.ndarray:
     with open(path, "r") as f:
         entry_per_row_str = f.readline()
         if not entry_per_row_str:
-            raise RuntimeError(
-                f"""The first row of the covariance matrix file must contain the number of entries per row in the matrix, but is empty or None.
-                Covariance matrix file: '{path}'"""
-            )
+            raise RuntimeError((
+                f"The first row of the covariance matrix file must contain the number of entries per row in the matrix,"
+                f"but is empty or None. Covariance matrix file: '{path}'"
+            ))
         n_entries = int(entry_per_row_str.strip())
         res = np.loadtxt(f, dtype=dtype)
         return res.reshape(n_entries, n_entries)
@@ -56,7 +55,7 @@ class FitresDataPaths(List[FitresDataPath]):
 
 def _construct_fitres_data_path(fitres_file_path: Path) -> FitresDataPath:
     name: str = fitres_file_path.stem
-    id = name[name.rindex("_") + 1 :]
+    id = name[name.rindex("_") + 1:]
     sys_mat_path = fitres_file_path.parent.joinpath(f"sys_full_long_{id}.txt")
     assert sys_mat_path.exists()
     return FitresDataPath(
@@ -75,12 +74,13 @@ def get_available_fitres_data(fitres_path: Union[Path, str]) -> FitresDataPaths:
     )
 
 
-def parse_fits(fitres: str, sys_matrix: str, cosmology: Cosmology = Planck15) -> Optional[FitresData]:    
+def parse_fits(fitres: str, sys_matrix: str, cosmology: Cosmology = Planck15) -> Optional[FitresData]:
     C_sys = load_sys_from_file(sys_matrix)
     tobj = txtobj(fitres, fitresheader=True)
     tobj = getmu(tobj, cosmo=cosmology)
     C = C_sys + np.diag(tobj.muerr**2)
     return FitresData(cov_matrix=C, mu=tobj.mu, delta_mu=tobj.mures)
+
 
 def load_fit_data(
     fit_path: Optional[FitresDataPath],

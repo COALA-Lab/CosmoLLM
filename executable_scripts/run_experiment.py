@@ -4,7 +4,6 @@ import subprocess
 from pathlib import Path
 from argparse import ArgumentParser
 import traceback
-from sys import stdout
 
 import numpy as np
 import zeus

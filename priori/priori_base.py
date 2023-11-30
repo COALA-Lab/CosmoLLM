@@ -20,7 +20,11 @@ class PrioriContext:
         self.params = params
 
     def __repr__(self) -> str:
-        return f'PrioriContext(hubble={self.hubble}, omega_m={self.omega_m}, density={self.density}, params={self.params})'
+        return (
+            f'PrioriContext('
+            f'hubble={self.hubble}, omega_m={self.omega_m}, density={self.density}, params={self.params}'
+            f')'
+        )
 
 
 class PrioriFunction:

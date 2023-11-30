@@ -3,7 +3,7 @@ import numpy as np
 
 
 class BaseParametrization(abc.ABC):
-    
+
     def __init_subclass__(cls) -> None:
         if not hasattr(cls, 'name'):
             raise RuntimeError('A sublcass of BaseParametrization must have a defined "name" class attribute!')
@@ -18,12 +18,13 @@ class BaseParametrization(abc.ABC):
     @abc.abstractmethod
     def eval(self, z: np.ndarray, params: np.ndarray) -> np.ndarray:
         pass
-    
+
     def __call__(self, z: np.ndarray, params: np.ndarray) -> np.ndarray:
         return self.eval(z, params)
 
 
 DYNAMIC_N_PARAMS = -1
+
 
 def density_parametrization(of_name: str, num_of_params: int):
     def _parametrized_density_decorator(klass):
@@ -33,4 +34,3 @@ def density_parametrization(of_name: str, num_of_params: int):
 
         return _ParametrizedDensity
     return _parametrized_density_decorator
-        

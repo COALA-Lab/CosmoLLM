@@ -1,8 +1,7 @@
 import openai
 
 from llm_integrations.utils import is_valid_python_code, save_py_script
-
-from . import settings
+from llm_integrations import settings
 
 
 class ChatGPT:
@@ -40,19 +39,17 @@ class ChatGPT:
             ]
         )
         return completion.choices[0].message.content
-    
+
     def handle_parametrization_generation(self, message: str):
         response = self._generate_code(message, settings.PARAMETRIZATION_GENERATION_SYSTEM_PROMPT)
         if not is_valid_python_code(response):
             return 'Failed to generate code'
         save_py_script(response, 'parametrization')
         return response
-    
+
     def handle_priori_generation(self, message: str):
         response = self._generate_code(message, settings.PRIORI_GENERATION_SYSTEM_PROMPT)
         if not is_valid_python_code(response):
             return 'Failed to generate code'
         save_py_script(response, 'priori')
         return response
-
-    

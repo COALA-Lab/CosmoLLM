@@ -1,15 +1,17 @@
 from unittest import TestCase
 
-from llm_integrations.openai import ChatGPT
-from llm_integrations.langchain import Chat
+from llm_integrations.openai import ChatGPT  # noqa: F401
+from llm_integrations.langchain import Chat  # noqa: F401
 
+
+# TODO: remove this test after MVP
 
 class TestChatSimple(TestCase):
     user_message = """
         this is the code of my function:
         def bla(a,b):
             return a*b
-        write me a script that calls this function for all numbers a=1..20 and b=3..40. 
+        write me a script that calls this function for all numbers a=1..20 and b=3..40.
         The code must make a 3d plot of the returned results,
         with a on the x axis, b on the y axis and the function's result on z axis.
     """

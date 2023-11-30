@@ -1,7 +1,6 @@
-
-from datetime import datetime
 import os
 import time
+
 
 def save_py_script(code: str, module: str):
     start = code.find("'")+1
@@ -17,5 +16,5 @@ def is_valid_python_code(code: str):
     try:
         compile(code, "test", "exec")
         return True
-    except:
+    except Exception:
         return False
