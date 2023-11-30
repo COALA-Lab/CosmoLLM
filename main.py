@@ -10,8 +10,8 @@ def execute():
         if user_input == "quit":
             break
 
-        response = agent.send_message(user_input)
-        # response = agent.handle_parametrization_generation(user_input)
+        #response = agent.send_message(user_input)
+        response = agent.handle_parametrization_generation(user_input)
         # response = agent.handle_priori_generation(user_input)
         print("Bot: " + response)
 
