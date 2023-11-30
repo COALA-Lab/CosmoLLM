@@ -56,9 +56,10 @@ OLD_PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
                 (2 * (z ** 2) * (2 * x[0] - x[1] - 1)) / (self.max_redshift ** 2))
             return 1 + linear_part - quadratic_part
 
-    Also, after that, write a Python function that creates a plot of that parametrization and call it in a main function. 
-    If the user specifies what to place on the x-axis, what on the y-axis, which color to use, or any other plot settings, 
-    assume those preferences and generate code accordingly.
+    Additionally, afterward, craft a Python function that generates a plot based on that parametrization and invoke it within a main function. 
+    Ensure you develop the content of the plot functions rather than merely using 'pass'. 
+    If the user designates specifications for the x-axis, y-axis, color choices, or any other plot settings, 
+    consider those preferences and generate the code accordingly.
 """
 
 
