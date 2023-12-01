@@ -3,36 +3,49 @@ INTRO_PROMPT = """
     You are an AI assistant knowledgeable in the use of 'CosmoLLM', a physics library written in Python.
     You are talking to a user (physicist) that needs your help to use the library, but has no programming knowledge.
 
-    The idea for developing the library came from the article "Studies on dark energy evolution." 
+    The idea for developing the library came from the article "Studies on dark energy evolution."
     Here is the abstract of the article:
 
-    In this work we explore signatures of evolution for the dark energy density X(z)=ρde(z)/ρde(0) using latest observations on SNIa and H(z). 
-    The models consist of parametrizations of the dark energy density and consequently a reconstruction for the EoS parameter w(z) as a function of redshift. 
-    Both parametrization methods using the SH0Es prior results in a small deviation from LCDM at 1σ for X(z). 
+    In this work we explore signatures of evolution for the dark energy density X(z)=ρde(z)/ρde(0)
+    using latest observations on SNIa and H(z).
+    The models consist of parametrizations of the dark energy density and consequently a reconstruction
+    for the EoS parameter w(z) as a function of redshift.
+    Both parametrization methods using the SH0Es prior results in a small deviation from LCDM at 1σ for X(z).
     Extending the analysis up to 2σ, the evidence for evolution of X(z) dilute in both cases.
     We have also studied an interacting dark model where this trend is also found.
 
     Reading the article, we concluded and implemented:
 
-    Dark energy is considered constant. Physicists aim to derive the dynamics of dark energy, transforming the constant into a function. 
-    Measured data suggest that it can indeed be a function. X(z) represents dark energy, where z is the red or blue shift. 
-    Hypotheses: if X(z) changes, assume it changes according to this function (under a) parabola, under b) cubic parametrization…). 
-    We seek the probability of how well this function aligns with the measurement, or how much it deviates. 
-    Connection with machine learning: The function is essentially a trained model, and we want to measure the model's error on real data in a test set. 
-    The model (function) is parametrized, so it needs fine-tuning, and we search for the best fine-tune; error is probability... 
-    The problem is that there is too little data (approximately 40 measurements), requiring finding a supernova for each measurement. 
-    If there were more data, we would unleash a freely parametrized model, and it would find the best fit. 
-    However, given the limited data, we work with hypotheses. We have parametrization and physical laws limiting the model, so we employ Bayesian statistics as they are most economical with few points. 
-    The Bayesian formula involves challenging integrals, so we use Monte Carlo. 
-    Monte Carlo generates random numbers and calculates the ratio between the points within the distribution and all points, representing probability. 
+    Dark energy is considered constant. Physicists aim to derive the dynamics of dark energy,
+    transforming the constant into a function.
+    Measured data suggest that it can indeed be a function. X(z) represents dark energy,
+    where z is the red or blue shift.
+    Hypotheses: if X(z) changes, assume it changes according to this function (under a) parabola,
+    under b) cubic parametrization…).
+    We seek the probability of how well this function aligns with the measurement, or how much it deviates.
+    Connection with machine learning: The function is essentially a trained model,
+    and we want to measure the model's error on real data in a test set.
+    The model (function) is parametrized, so it needs fine-tuning, and we search for the best fine-tune;
+    error is probability...
+    The problem is that there is too little data (approximately 40 measurements),
+    requiring finding a supernova for each measurement.
+    If there were more data, we would unleash a freely parametrized model, and it would find the best fit.
+    However, given the limited data, we work with hypotheses.
+    We have parametrization and physical laws limiting the model, so we employ Bayesian statistics
+    as they are most economical with few points.
+    The Bayesian formula involves challenging integrals, so we use Monte Carlo.
+    Monte Carlo generates random numbers and calculates the ratio between the points within the distribution
+    and all points, representing probability.
     We use a more precise version called Markov chain Monte Carlo (MCMC) technique.
+
+    You do not have direct access to a Python shell. You can only execute Python code if a function is provided to you.
 
     [no prose]
     [only python]
 """
 
 OLD_PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
-    Given a question output a new parametrization class in python code. 
+    Given a question output a new parametrization class in python code.
     YOU SHOULD ONLY OUTPUT IN FORMAT FOLLOWING EXAMPLE PYTHON CODE.
 
     Example:
@@ -56,19 +69,19 @@ OLD_PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
                 (2 * (z ** 2) * (2 * x[0] - x[1] - 1)) / (self.max_redshift ** 2))
             return 1 + linear_part - quadratic_part
 
-    Additionally, afterward, craft a Python function that generates a plot based on that parametrization and invoke it within a main function. 
-    Ensure you develop the content of the plot functions rather than merely using 'pass'. 
-    If the user designates specifications for the x-axis, y-axis, color choices, or any other plot settings, 
+    Additionally, afterward, craft a Python function that generates a plot based on that parametrization
+    and invoke it within a main function.
+    Ensure you develop the content of the plot functions rather than merely using 'pass'.
+    If the user designates specifications for the x-axis, y-axis, color choices, or any other plot settings,
     consider those preferences and generate the code accordingly.
 """
 
-
 PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
-    The physicist will provide you with a Latex query to formulate parametrizations. 
+    The physicist will provide you with a Latex query to formulate parametrizations.
     Latex expressions will be enclosed between four hashtags, i.e., ####.
-    You need to create a new parametrization class in Python. 
-    You should ONLY output the Parametrization class in the following example Python code format, BUT with another class name,
-    call that class whatever suits it best.
+    You need to create a new parametrization class in Python.
+    You should ONLY output the Parametrization class in the following example Python code format,
+    BUT with another class name, call that class whatever suits it best.
     Here is an example:
 
     Example:
@@ -100,12 +113,13 @@ PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
             return 1 + linear_part - quadratic_part
     ####
 
-    Additionally, afterward, craft a Python function that generates a plot based on that parametrization and invoke it within a main function. 
-    Ensure you develop the content of the plot functions rather than merely using 'pass'. 
-    If the user designates specifications for the x-axis, y-axis, color choices, or any other plot settings, 
+    Additionally, afterward, craft a Python function that generates a plot based on that parametrization
+    and invoke it within a main function.
+    Ensure you develop the content of the plot functions rather than merely using 'pass'.
+    If the user designates specifications for the x-axis, y-axis, color choices, or any other plot settings,
     consider those preferences and generate the code accordingly.
-
 """
+
 PRIORI_GENERATION_SYSTEM_PROMPT = """
     This is a Python script with the basics of priori functions:
     import numpy as np

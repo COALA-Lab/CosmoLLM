@@ -24,6 +24,7 @@ class TestChatSimple(TestCase):
         print(f"User: {message}", "\n")
         print("(Generating response...)")
         response = agent.send_message(message)
+        self.assertTrue(isinstance(response, str))
         print("+++++++++++++++++++++++++++++++++++++")
         print(f"Agent: {response}")
         print("+++++++++++++++++++++++++++++++++++++", "\n")

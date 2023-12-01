@@ -16,4 +16,17 @@ OPENAI_FUNCTIONS = [
             },
         },
     },
+    {
+        "name": "load_from_file",
+        "description": "Load arbitrary data from a file",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string",
+                    "description": "The path to the file to load the data from",
+                },
+            },
+        },
+    },
 ]
