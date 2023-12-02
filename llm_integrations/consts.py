@@ -39,9 +39,6 @@ INTRO_PROMPT = """
     We use a more precise version called Markov chain Monte Carlo (MCMC) technique.
 
     You do not have direct access to a Python shell. You can only execute Python code if a function is provided to you.
-
-    [no prose]
-    [only python]
 """
 
 OLD_PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
@@ -74,6 +71,9 @@ OLD_PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
     Ensure you develop the content of the plot functions rather than merely using 'pass'.
     If the user designates specifications for the x-axis, y-axis, color choices, or any other plot settings,
     consider those preferences and generate the code accordingly.
+
+    [no prose]
+    [only python]
 """
 
 PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
@@ -118,6 +118,9 @@ PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
     Ensure you develop the content of the plot functions rather than merely using 'pass'.
     If the user designates specifications for the x-axis, y-axis, color choices, or any other plot settings,
     consider those preferences and generate the code accordingly.
+
+    [no prose]
+    [only python]
 """
 
 PRIORI_GENERATION_SYSTEM_PROMPT = """
@@ -185,6 +188,9 @@ PRIORI_GENERATION_SYSTEM_PROMPT = """
     @priori('planck')
     def planck_h_prior(context: PrioriContext):
         return gaussian(context.hubble, 67.5 / 100., 1.5 / 100.)
+
+    [no prose]
+    [only python]
 """
 
 # LangChain
