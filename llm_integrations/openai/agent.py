@@ -68,9 +68,6 @@ class ChatGPT:
 
             self.history.append({"role": "assistant", "content": response_message})
 
-            if len(self.history) > settings.HISTORY_LENGTH:
-                self.history.pop(0)
-
             return response_message
 
     def send_system_update(self, message: str) -> Union[str, List[dict]]:
@@ -168,7 +165,7 @@ class ChatGPT:
     # Utils
 
     def trim_history(self) -> None:
-        while self._get_history_length() > settings.OPENAI_MAX_MEMORY_LENGTH:
+        while self._get_history_length() > settings.MAX_HISTORY_LENGTH:
             self.history.pop(0)
 
     def _get_history_length(self) -> int:
