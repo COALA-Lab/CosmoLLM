@@ -1,8 +1,9 @@
+import code
 import os
 import time
 
 
-def save_py_script(code: str, module: str):
+def save_py_script(code: str, module: str) -> None:
     start = code.find("'")+1
     end = code.find("'", start)
     filename = code[start:end] + '_' + str(time.time_ns()) + '.py'
@@ -12,9 +13,12 @@ def save_py_script(code: str, module: str):
         file.write(code)
 
 
-def is_valid_python_code(code: str):
+def is_valid_python_code(code: str) -> bool:
+    return compile_python_code(code) is not None
+
+
+def compile_python_code(code: str, filename: str = "unknown") -> code:
     try:
-        compile(code, "test", "exec")
-        return True
+        return compile(code, filename, "exec")
     except Exception:
-        return False
+        return None

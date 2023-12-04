@@ -6,9 +6,16 @@ def execute():
 
     print("You are now chatting with a GPT powered chatbot. Type 'quit' to exit.")
     while True:
-        user_input = input("You: ")
-        if user_input == "quit":
+        user_input = input("You: ").strip()
+        if user_input.lower() == "quit":
             break
+        elif user_input.lower() == "reset":
+            agent.reset()
+            print("Bot: Resetting the chatbot")
+            continue
+        elif user_input.lower() == "history":
+            print(f"{agent.history=}")
+            continue
 
         response = agent.send_message(user_input)
         if not isinstance(response, str):
@@ -28,4 +35,8 @@ def execute():
 
 
 if __name__ == "__main__":
-    execute()
+    try:
+        execute()
+    except KeyboardInterrupt:
+        pass
+    print("\nExiting...")

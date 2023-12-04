@@ -26,6 +26,10 @@ OPENAI_FUNCTIONS = [
                     "type": "string",
                     "description": "The path to the file to load the data from",
                 },
+                "characters": {
+                    "type": "integer",
+                    "description": "The number of characters to read from the file (-1 for all)",
+                },
             },
         },
     },

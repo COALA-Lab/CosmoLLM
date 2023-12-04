@@ -1,9 +1,11 @@
+import io
 import json
-from typing import Union, List
+from contextlib import redirect_stdout
+from typing import Union, List, Optional
 
 import openai
 
-from llm_integrations.utils import is_valid_python_code, save_py_script
+from llm_integrations.utils import is_valid_python_code, save_py_script, compile_python_code
 from llm_integrations import settings
 
 from . import consts
@@ -18,6 +20,10 @@ class ChatGPT:
 
         openai.api_key = settings.OPENAI_API_KEY
 
+    def reset(self) -> None:
+        self.history = []
+        self.events = []
+
     def send_message(self, message: str, role: str = "user", ignore_events: bool = False) -> Union[str, List[dict]]:
         messages = []
         messages.extend([
@@ -27,6 +33,7 @@ class ChatGPT:
         if role == "user":
             self.history.append({"role": role, "content": message})
             messages.extend(self.history)
+            self.trim_history()
         else:
             messages.append({"role": role, "content": message})
 
@@ -84,14 +91,14 @@ class ChatGPT:
         )
         return completion.choices[0].message.content
 
-    def handle_parametrization_generation(self, message: str):
+    def handle_parametrization_generation(self, message: str) -> str:
         response = self._generate_code(message, settings.PARAMETRIZATION_GENERATION_SYSTEM_PROMPT)
         if not is_valid_python_code(response):
             return 'Failed to generate code'
         save_py_script(response, 'parametrization')
         return response
 
-    def handle_priori_generation(self, message: str):
+    def handle_priori_generation(self, message: str) -> str:
         response = self._generate_code(message, settings.PRIORI_GENERATION_SYSTEM_PROMPT)
         if not is_valid_python_code(response):
             return 'Failed to generate code'
@@ -102,25 +109,67 @@ class ChatGPT:
 
     def _handle_openai_function(self, function_call: dict) -> None:
         name = function_call["name"]
-        params = {}
-        if function_call.get("arguments", None):
-            try:
-                params = json.loads(function_call["arguments"])
-            except json.JSONDecodeError:
-                raise Exception(f"Failed to parse parameters for function call! params: {function_call['arguments']}")
 
-        if (function := getattr(self, name, None)) is not None:
-            function(**params)
+        if name == "python":
+            code = function_call["arguments"]
+            if not is_valid_python_code(code):
+                self.add_system_event(f"Invalid python code:\n{code}")
+                return
+
+            try:
+                output = io.StringIO()
+                with redirect_stdout(output):
+                    exec(compile_python_code(code))
+
+                self.add_system_event(f"Executed python code:\n{code}\nOutput:\n{output.getvalue()}")
+            except Exception as e:
+                self.add_system_event(f"Failed to execute python code:\n{code}\nException:\n{e}")
+                return
         else:
-            raise NotImplementedError(f"Function {name} not implemented")
+            params = {}
+            if function_call.get("arguments", None):
+                try:
+                    params = json.loads(function_call["arguments"])
+                except json.JSONDecodeError:
+                    self.add_system_event(
+                        f"Failed to parse parameters for function call {name}"
+                        f"with arguments {function_call['arguments']}"
+                    )
+                    return
+
+            if (function := getattr(self, name, None)) is not None:
+                function(**params)
+            else:
+                self.add_system_event(f"Unknown function call {name}")
+                return
 
     def save_to_file(self, data: str, filename: str) -> None:
-        with open(filename, "w") as f:
-            f.write(data)
-        self.add_system_event(f"Saved data to file {filename}")
+        try:
+            with open(filename, "w") as f:
+                f.write(data)
+            self.add_system_event(f"Saved data to file {filename}")
+        except PermissionError:
+            self.add_system_event(f"Failed to save data to file {filename} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to save data to file {filename} with exception {e}")
 
-    def load_from_file(self, filename: str) -> str:
-        with open(filename, "r") as f:
-            file_contents = f.read()
-        self.add_system_event(f"Loaded file {filename} with the contents:\n{file_contents}")
-        return file_contents
+    def load_from_file(self, filename: str, characters: int = -1) -> None:
+        try:
+            with open(filename, "r") as f:
+                file_contents = f.read(characters)
+            self.add_system_event(f"Loaded file {filename} with the contents:\n{file_contents}")
+        except FileNotFoundError:
+            self.add_system_event(f"Failed to load file {filename} due to file not found error")
+        except PermissionError:
+            self.add_system_event(f"Failed to load file {filename} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to load file {filename} with exception {e}")
+
+    # Utils
+
+    def trim_history(self) -> None:
+        while self._get_history_length() > settings.OPENAI_MAX_MEMORY_LENGTH:
+            self.history.pop(0)
+
+    def _get_history_length(self) -> int:
+        return sum([len(message["content"]) for message in self.history])
