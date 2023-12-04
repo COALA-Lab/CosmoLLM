@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from llm_integrations.openai import ChatGPT
 
 
@@ -7,14 +9,15 @@ def execute():
     print("You are now chatting with a GPT powered chatbot. Type 'quit' to exit.")
     while True:
         user_input = input("You: ").strip()
-        if user_input.lower() == "quit":
+        if user_input.lower() in ["quit", "exit", "q"]:
             break
         elif user_input.lower() == "reset":
             agent.reset()
             print("Bot: Resetting the chatbot")
             continue
         elif user_input.lower() == "history":
-            print(f"{agent.history=}")
+            print("History:")
+            pprint(agent.history)
             continue
 
         response = agent.send_message(user_input)
