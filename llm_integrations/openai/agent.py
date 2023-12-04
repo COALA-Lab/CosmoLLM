@@ -1,7 +1,7 @@
 import io
 import json
 from contextlib import redirect_stdout
-from typing import Union, List, Optional
+from typing import Union, List
 
 import openai
 
