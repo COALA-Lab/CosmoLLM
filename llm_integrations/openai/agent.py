@@ -17,6 +17,7 @@ class ChatGPT:
         self.model = settings.OPENAI_CHAT_GPT_MODEL
         self.history = []
         self.events = []
+        self.last_message = None
 
         openai.api_key = settings.OPENAI_API_KEY
 
@@ -31,13 +32,15 @@ class ChatGPT:
         ])
 
         if role == "user":
+            self.last_message = message
             self.history.append({"role": role, "content": message})
             messages.extend(self.history)
             self.trim_history()
         else:
             messages.append({"role": role, "content": message})
 
-        if not ignore_events:
+        if not ignore_events and len(self.events) > 0:
+            [print("Event: " + event) for event in self.events]
             messages.extend([
                 {"role": "system", "content": f"A system event occurred: {event}"}
                 for event in self.events
@@ -90,16 +93,16 @@ class ChatGPT:
 
     def handle_parametrization_generation(self, message: str) -> str:
         response = self._generate_code(message, settings.PARAMETRIZATION_GENERATION_SYSTEM_PROMPT)
-        if not is_valid_python_code(response):
-            return 'Failed to generate code'
-        save_py_script(response, 'parametrization')
+        # if not is_valid_python_code(response):
+        #     return 'Failed to generate code'
+        # save_py_script(response, 'parametrization')
         return response
 
     def handle_priori_generation(self, message: str) -> str:
         response = self._generate_code(message, settings.PRIORI_GENERATION_SYSTEM_PROMPT)
-        if not is_valid_python_code(response):
-            return 'Failed to generate code'
-        save_py_script(response, 'priori')
+        # if not is_valid_python_code(response):
+        #     return 'Failed to generate code'
+        # save_py_script(response, 'priori')
         return response
 
     # OpenAI function implementations
@@ -139,6 +142,13 @@ class ChatGPT:
             else:
                 self.add_system_event(f"Unknown function call {name}")
                 return
+
+
+    def generate_parametrization(self) -> None:
+        self.add_system_event(self.handle_parametrization_generation(self.last_message))
+
+    def generate_priori(self) -> None:
+        self.add_system_event(self.handle_priori_generation(self.last_message))
 
     def save_to_file(self, data: str, filename: str) -> None:
         try:

@@ -33,4 +33,20 @@ OPENAI_FUNCTIONS = [
             },
         },
     },
+    {
+        "name": "generate_parametrization",
+        "description": "Useful for generating a parametrization",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        },
+    },
+    {
+        "name": "generate_priori",
+        "description": "Useful for generating a priori",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        },
+    },
 ]

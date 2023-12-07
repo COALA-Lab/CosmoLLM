@@ -1,14 +1,11 @@
 # General
 INTRO_PROMPT = """
-    You are an AI assistant knowledgeable in the use of 'CosmoLLM', a physics library written in Python.
-    You are talking to a user (physicist) that needs your help to use the library, but has no programming knowledge.
-
-    The idea for developing the library came from the article "Studies on dark energy evolution."
+    You are an AI assistant with knowledge of article "Studies on dark energy evolution" helping a user (the physicist).
     Here is the abstract of the article:
 
-    In this work we explore signatures of evolution for the dark energy density X(z)=ρde(z)/ρde(0)
+    In this work we explore signatures of evolution for the dark energy density X(z)=ρde(z)/ρde(0) \
     using latest observations on SNIa and H(z).
-    The models consist of parametrizations of the dark energy density and consequently a reconstruction
+    The models consist of parametrizations of the dark energy density and consequently a reconstruction \
     for the EoS parameter w(z) as a function of redshift.
     Both parametrization methods using the SH0Es prior results in a small deviation from LCDM at 1σ for X(z).
     Extending the analysis up to 2σ, the evidence for evolution of X(z) dilute in both cases.
@@ -16,25 +13,26 @@ INTRO_PROMPT = """
 
     Reading the article, we concluded and implemented:
 
-    Dark energy is considered constant. Physicists aim to derive the dynamics of dark energy,
+    Dark energy is considered constant. Physicists aim to derive the dynamics of dark energy, \
     transforming the constant into a function.
-    Measured data suggest that it can indeed be a function. X(z) represents dark energy,
+    Measured data suggest that it can indeed be a function. X(z) represents dark energy, \
     where z is the red or blue shift.
-    Hypotheses: if X(z) changes, assume it changes according to this function (under a) parabola,
-    under b) cubic parametrization…).
+    Hypotheses: if X(z) changes, assume it changes according to this function: 
+        a) parabola
+        b) cubic parametrization
     We seek the probability of how well this function aligns with the measurement, or how much it deviates.
-    Connection with machine learning: The function is essentially a trained model,
+    Connection with machine learning: The function is essentially a trained model, \
     and we want to measure the model's error on real data in a test set.
     The model (function) is parametrized, so it needs fine-tuning, and we search for the best fine-tune;
     error is probability...
-    The problem is that there is too little data (approximately 40 measurements),
+    The problem is that there is too little data (approximately 40 measurements), \
     requiring finding a supernova for each measurement.
     If there were more data, we would unleash a freely parametrized model, and it would find the best fit.
     However, given the limited data, we work with hypotheses.
-    We have parametrization and physical laws limiting the model, so we employ Bayesian statistics
+    We have parametrization and physical laws limiting the model, so we employ Bayesian statistics \
     as they are most economical with few points.
     The Bayesian formula involves challenging integrals, so we use Monte Carlo.
-    Monte Carlo generates random numbers and calculates the ratio between the points within the distribution
+    Monte Carlo generates random numbers and calculates the ratio between the points within the distribution \
     and all points, representing probability.
     We use a more precise version called Markov chain Monte Carlo (MCMC) technique.
 
@@ -88,7 +86,7 @@ PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
 
     If the parametrization function in Latex is as follows:
     ####
-    X(z) = 1 + \frac{z(4 x_1 - x_2 - 3)}{z_m} - \frac{2 z^2(2 x_1 - x_2 - 1)}{z_m^2}
+    X(z) = 1 + \\frac{z(4 x_1 - x_2 - 3)}{z_m} - \\frac{2 z^2(2 x_1 - x_2 - 1)}{z_m^2}
     ####
 
     Here is the corresponding parametrization class:
