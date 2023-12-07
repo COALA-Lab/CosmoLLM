@@ -7,6 +7,7 @@ import openai
 
 from llm_integrations.utils import is_valid_python_code, save_py_script, compile_python_code
 from llm_integrations import settings
+from executable_scripts.run_experiment import plot
 
 from . import consts
 
@@ -171,6 +172,20 @@ class ChatGPT:
             self.add_system_event(f"Failed to load file {filename} due to permission error")
         except Exception as e:
             self.add_system_event(f"Failed to load file {filename} with exception {e}")
+
+    def plot_graphs(self, filename: str) -> None:
+        try:
+            print("Plotting results...")
+            plot(filename)
+            print("Done!")
+            self.add_system_event(f"Plotted from {filename}")
+        except FileNotFoundError:
+            self.add_system_event(f"Failed to load file {filename} due to file not found error")
+        except PermissionError:
+            self.add_system_event(f"Failed to load file {filename} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to load file {filename} with exception {e}")
+
 
     # Utils
 
