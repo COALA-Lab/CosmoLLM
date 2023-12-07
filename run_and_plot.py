@@ -26,9 +26,9 @@ def execute(workers: int, config_path: str, results_path: str, experiment_id: st
         raise RuntimeError("Experiment failed!")
 
     # Plot the results
-    print("Plotting results...")
-    plotter.execute(f"{results_path}/{experiment_id}")
-    print("Done!")
+    #print("Plotting results...")
+    #plotter.execute(f"{results_path}/{experiment_id}")
+    #print("Done!")
 
     # TODO: Extract results into csv
     # TODO: Add density evaluation with different parameter values
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '-r', '--results-path',
         help='Path to the results directory, where the chains will be saved',
-        default='/tmp/cosmo_llm_results/'
+        default='tmp/cosmo_llm_results/'
     )
     parser.add_argument(
         '-i', '--experiment-id',

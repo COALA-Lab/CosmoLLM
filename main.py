@@ -31,7 +31,7 @@ def execute():
                     "You have to be very user friendly when summarizing the events for the user."
                 )
                 if not isinstance(response, str):
-                    raise Exception("Bot response should be a string after system update")
+                   raise Exception("Bot response should be a string after system update")
         # response = agent.handle_parametrization_generation(user_input)
         # response = agent.handle_priori_generation(user_input)
         print("Bot: " + response)
