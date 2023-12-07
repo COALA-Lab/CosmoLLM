@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+import os
+import subprocess
 
 from models.experiment_config import ExperimentConfig
 from utils.util import generate_experiment_id, load_model
 
-import executable_scripts.plot_graphs as plotter
-
-from run_calculation import execute as run_calculation
-
 
 def execute(workers: int, config_path: str, results_path: str, experiment_id: str, quiet: bool) -> None:
     # Run the experiment
-    run_calculation(workers, config_path, results_path, experiment_id, quiet)
+    subprocess_env = os.environ.copy()
+    subprocess_env["PYTHONPATH"] = os.getcwd()
 
-    # Plot the results
-    print("Plotting results...")
-    plotter.execute(f"{results_path}/{experiment_id}")
-    print("Done!")
-
-    # TODO: Extract results into csv
-    # TODO: Add density evaluation with different parameter values
+    command = (
+        f"mpiexec -n {workers} python3 executable_scripts/run_experiment.py {config_path} "
+        f"--results-path {results_path} --experiment-id {experiment_id}"
+    )
+    if quiet:
+        command += " -q"
+    result = subprocess.run(command, shell=True, env=subprocess_env, cwd=os.getcwd())
+    if result.returncode != 0:
+        raise RuntimeError("Experiment failed!")
 
 
 if __name__ == "__main__":

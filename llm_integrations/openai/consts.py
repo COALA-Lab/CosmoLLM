@@ -35,11 +35,12 @@ OPENAI_FUNCTIONS = [
     },
     {
         "name": "plot_graphs",
-        "description": "Generate several plots, including chain plots, corner plots, and density plots, based on the data stored in the experiment results directory",
+        "description": "Generate several plots, including chain plots, corner plots, and density plots, "
+                       "based on the data stored in the experiment results directory",
         "parameters": {
             "type": "object",
             "properties": {
-                "filename": {
+                "experiment_path": {
                     "type": "string",
                     "description": "The path to the experiment results",
                 },

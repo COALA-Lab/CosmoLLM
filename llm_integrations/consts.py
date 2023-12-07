@@ -17,7 +17,7 @@ INTRO_PROMPT = """
     transforming the constant into a function.
     Measured data suggest that it can indeed be a function. X(z) represents dark energy, \
     where z is the red or blue shift.
-    Hypotheses: if X(z) changes, assume it changes according to this function: 
+    Hypotheses: if X(z) changes, assume it changes according to this function:
         a) parabola
         b) cubic parametrization
     We seek the probability of how well this function aligns with the measurement, or how much it deviates.

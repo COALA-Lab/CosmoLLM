@@ -5,9 +5,9 @@ from typing import Union, List
 
 import openai
 
-from llm_integrations.utils import is_valid_python_code, save_py_script, compile_python_code
+from llm_integrations.utils import is_valid_python_code, compile_python_code
 from llm_integrations import settings
-from executable_scripts.run_experiment import plot
+from executable_scripts.plot_graphs import execute as plot
 
 from . import consts
 
@@ -41,7 +41,6 @@ class ChatGPT:
             messages.append({"role": role, "content": message})
 
         if not ignore_events and len(self.events) > 0:
-            [print("Event: " + event) for event in self.events]
             messages.extend([
                 {"role": "system", "content": f"A system event occurred: {event}"}
                 for event in self.events
@@ -94,16 +93,10 @@ class ChatGPT:
 
     def handle_parametrization_generation(self, message: str) -> str:
         response = self._generate_code(message, settings.PARAMETRIZATION_GENERATION_SYSTEM_PROMPT)
-        # if not is_valid_python_code(response):
-        #     return 'Failed to generate code'
-        # save_py_script(response, 'parametrization')
         return response
 
     def handle_priori_generation(self, message: str) -> str:
         response = self._generate_code(message, settings.PRIORI_GENERATION_SYSTEM_PROMPT)
-        # if not is_valid_python_code(response):
-        #     return 'Failed to generate code'
-        # save_py_script(response, 'priori')
         return response
 
     # OpenAI function implementations
@@ -172,18 +165,16 @@ class ChatGPT:
         except Exception as e:
             self.add_system_event(f"Failed to load file {filename} with exception {e}")
 
-    def plot_graphs(self, filename: str) -> None:
+    def plot_graphs(self, experiment_path: str) -> None:
         try:
-            print("Plotting results...")
-            plot(filename)
-            print("Done!")
-            self.add_system_event(f"Plotted from {filename}")
+            plot(experiment_path)
+            self.add_system_event(f"Plotted from {experiment_path}")
         except FileNotFoundError:
-            self.add_system_event(f"Failed to load file {filename} due to file not found error")
+            self.add_system_event(f"Failed to load results in {experiment_path} due to file not found error")
         except PermissionError:
-            self.add_system_event(f"Failed to load file {filename} due to permission error")
+            self.add_system_event(f"Failed to load results in {experiment_path} due to permission error")
         except Exception as e:
-            self.add_system_event(f"Failed to load file {filename} with exception {e}")
+            self.add_system_event(f"Failed to load results in {experiment_path} with exception {e}")
 
     # Utils
 
