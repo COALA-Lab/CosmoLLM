@@ -144,9 +144,8 @@ class ChatGPT:
                 self.add_system_event(f"Unknown function call {name}")
                 return
 
-
-    def generate_parametrization(self) -> None:
-        self.add_system_event(self.handle_parametrization_generation(self.last_message))
+    def generate_parametrization(self, parametrization_function_in_latex: str) -> None:
+        self.add_system_event(self.handle_parametrization_generation(parametrization_function_in_latex))
 
     def generate_priori(self) -> None:
         self.add_system_event(self.handle_priori_generation(self.last_message))
@@ -185,7 +184,6 @@ class ChatGPT:
             self.add_system_event(f"Failed to load file {filename} due to permission error")
         except Exception as e:
             self.add_system_event(f"Failed to load file {filename} with exception {e}")
-
 
     # Utils
 

@@ -51,7 +51,13 @@ OPENAI_FUNCTIONS = [
         "description": "Useful for generating a parametrization",
         "parameters": {
             "type": "object",
-            "properties": {}
+            "properties": {
+                "parametrization_function_in_latex": {
+                    "type": "string",
+                    "description": "The parametrization function in Latex markup"
+                }
+            },
+            "required": [],
         },
     },
     {

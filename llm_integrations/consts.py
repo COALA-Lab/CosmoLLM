@@ -111,12 +111,6 @@ PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
             return 1 + linear_part - quadratic_part
     ####
 
-    Additionally, afterward, craft a Python function that generates a plot based on that parametrization
-    and invoke it within a main function.
-    Ensure you develop the content of the plot functions rather than merely using 'pass'.
-    If the user designates specifications for the x-axis, y-axis, color choices, or any other plot settings,
-    consider those preferences and generate the code accordingly.
-
     [no prose]
     [only python]
 """
