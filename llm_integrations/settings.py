@@ -1,10 +1,12 @@
+import os
+
 from environs import Env
 
 from . import consts
 
 
 env = Env()
-env.read_env()
+env.read_env(path=os.getcwd() + "/.env")
 
 
 # General
