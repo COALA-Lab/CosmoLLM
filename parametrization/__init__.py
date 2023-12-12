@@ -9,7 +9,7 @@ import warnings
 
 from .parametrization_base import BaseParametrization
 
-PARAMETRIZATIONS_DIRECTORY = Path(__file__).parent.absolute()
+PARAMETRIZATIONS_DIRECTORY = "parametrization"
 
 _IGNORE_FILES = {"__init__.py", "parametrization_base.py"}
 

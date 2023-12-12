@@ -6,7 +6,7 @@ import inspect
 
 from .priori_base import PrioriFunction, PrioriContext  # noqa: F401
 
-PRIORIS_DIRECTORY = Path(__file__).parent.absolute()
+PRIORIS_DIRECTORY = "priori"
 _IGNORE_FILES = {"__init__.py", "priori_base.py"}
 
 
