@@ -69,4 +69,12 @@ OPENAI_FUNCTIONS = [
             "properties": {}
         },
     },
+    {
+        "name": "generate_config",
+        "description": "Useful for generating config",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        },
+    }
 ]

@@ -185,6 +185,80 @@ PRIORI_GENERATION_SYSTEM_PROMPT = """
     [only python]
 """
 
+CONFIG_GENERATION_SYSTEM_PROMPT = """
+    Given a question output a new configuration in JSON format.
+    THE RESPONSE SHOULD NOT CONTAIN ANYTHING BUT THE CONFIGURATION IN JSON.
+    
+    Keep in mind that the only two possible values for fits_path.fitres and fits_path.sys are 
+    "fits_path": {
+        "fitres": "./Pantheon/data_fitres/Ancillary_G10.FITRES",
+        "sys": "./Pantheon/data_fitres/sys_full_long_G10.txt"
+    }
+    
+    and
+        
+    "fits_path": {
+        "fitres": "./Pantheon/data_fitres/Ancillary_C11.FITRES",
+        "sys": "./Pantheon/data_fitres/sys_full_long_C11.txt"
+    },
+    unless said otherwise.
+        
+    YOU SHOULD ONLY OUTPUT IN FORMAT FOLLOWING EXAMPLES:   
+    1st example:
+    {
+        "name": "cyclic1",
+        "nwalkers": 20,
+        "nsteps": 5000,
+        "nchains": 4,
+        "parametrization": {
+            "name": "cyclic",
+            "param_names": ["g", "a_max", "m"]
+        },
+        "max_redshift": 1.0,
+        "cosmo": "default",
+        "fits_path": {
+            "fitres": "./Pantheon/data_fitres/Ancillary_G10.FITRES",
+            "sys": "./Pantheon/data_fitres/sys_full_long_G10.txt"
+        },
+        "truth_values": "data/hubbles.csv",
+        "priori": {
+            "matter": "gauss",
+            "hubble": "planck",
+            "m": "m_gaussian_priori",
+            "g": "g_gaussian_priori",
+            "a_max": "a_max_uniform_priori"
+        }
+    }
+    
+    2nd example:
+    {
+        "name": "quadratic_interpolate",
+        "nwalkers": 20,
+        "nsteps": 5000,
+        "nchains": 4,
+        "parametrization": {
+            "name": "quadratic",
+            "param_names": ["x1", "x2"]
+        },
+        "max_redshift": 1.0,
+        "cosmo": "default",
+        "fits_path": {
+            "fitres": "./Pantheon/data_fitres/Ancillary_C11.FITRES",
+            "sys": "./Pantheon/data_fitres/sys_full_long_C11.txt"
+        },
+        "truth_values": "data/hubbles.csv",
+        "priori": {
+            "matter": "gauss",
+            "hubble": "planck",
+            "params": "gaussian_around_one"
+        }
+    }
+
+
+    [no prose]
+    [only json]
+"""
+
 # LangChain
 LANGCHAIN_MEMORY_KEY = "chat_memory"
 LANGCHAIN_HUMAN_MESSAGE_KEY = "human_message"

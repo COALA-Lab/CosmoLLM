@@ -99,6 +99,10 @@ class ChatGPT:
         response = self._generate_code(message, settings.PRIORI_GENERATION_SYSTEM_PROMPT)
         return response
 
+    def handle_config_generation(self, message: str) -> str:
+        response = self._generate_code(message, settings.PRIORI_GENERATION_SYSTEM_PROMPT)
+        return response
+
     # OpenAI function implementations
 
     def _handle_openai_function(self, function_call: dict) -> None:
@@ -142,6 +146,9 @@ class ChatGPT:
 
     def generate_priori(self) -> None:
         self.add_system_event(self.handle_priori_generation(self.last_message))
+
+    def generate_config(self) -> None:
+        self.add_system_event(self.handle_config_generation(self.last_message))
 
     def save_to_file(self, data: str, filename: str) -> None:
         try:
