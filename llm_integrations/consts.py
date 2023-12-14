@@ -39,6 +39,14 @@ INTRO_PROMPT = """
     You do not have direct access to a Python shell. You can only execute Python code if a function is provided to you.
 """
 
+EVENTS_PROMPT = """
+    Respond to the system events for the user.  
+    The user does not see the events or know that they exist.   
+    The user didn't cause the events. They were caused either by you or an external system. 
+    It is likely that an event is the result of some action you did, for example loading a file.    
+    You have to be very user friendly when summarizing the events for the user. 
+"""
+
 OLD_PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
     Given a question output a new parametrization class in python code.
     YOU SHOULD ONLY OUTPUT IN FORMAT FOLLOWING EXAMPLE PYTHON CODE.
