@@ -4,12 +4,12 @@ import subprocess
 from argparse import ArgumentParser
 from pprint import pprint
 
-from agents.chat_agent import ChatAgent
 from consts import CHAT_INTRO_TEXT
+from llm_integrations.openai.repeatable_agent import RepeatableChatGPT
 
 
 def main_console() -> None:
-    agent = ChatAgent()
+    agent = RepeatableChatGPT()
     print(CHAT_INTRO_TEXT)
     print("Type 'quit' to exit.\n")
     while True:
@@ -22,11 +22,20 @@ def main_console() -> None:
             continue
         elif user_input.lower() == "history":
             print("History:")
-            pprint(agent.chatbot.history)
+            pprint(agent.history)
             continue
 
-        response = agent.send_message(user_input)
+        response = agent.generate_answer(user_input)
         print("Bot: " + response)
+        while True:
+            user_input = input("Confirm? (Y/N): ").strip()
+            if user_input.lower() in ["y", "yes"]:
+                agent.confirm_answer()
+                break
+            elif user_input.lower() in ["n", "no"]:
+                response = agent.regenerate_answer()
+                print("Bot: " + response)
+                continue;
 
 
 def main_gui() -> None:

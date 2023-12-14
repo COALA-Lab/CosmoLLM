@@ -1,5 +1,7 @@
 from typing import Union, List
+
 import openai
+
 from . import consts
 from .agent_base import AgentBase
 
@@ -15,14 +17,11 @@ class RepeatableChatGPT(AgentBase):
         messages.extend(self.history)
 
         self.trim_history()
-        openai.
         completion = openai.ChatCompletion.create(
             model=self.model,
             messages=messages,
             tools=[{"type": "function", "function": function} for function in consts.OPENAI_FUNCTIONS],
             tool_choice="auto",
-
-
         )
 
         response = completion.choices[0].message
@@ -72,9 +71,11 @@ class RepeatableChatGPT(AgentBase):
     def add_system_event(self, message: str) -> None:
         self.events.append(message)
 
-    def confirm_answer(self, message: str):
+    def confirm_answer(self):
         self.history.append({"role": "assistant", "content": self.last_assistant_message})
         self.events = []
 
     def regenerate_answer(self):
-        pass
+        self.events = []
+        self.history.pop()  # human
+        return self.generate_answer(self.last_human_message)

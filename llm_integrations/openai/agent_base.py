@@ -3,6 +3,7 @@ import json
 from contextlib import redirect_stdout
 
 import openai
+from langchain.llms.openai import OpenAI
 
 from llm_integrations.utils import is_valid_python_code, compile_python_code
 from llm_integrations import settings
