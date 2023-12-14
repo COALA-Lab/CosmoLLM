@@ -1,12 +1,17 @@
+import os
+import subprocess
+
+from argparse import ArgumentParser
 from pprint import pprint
 
-from llm_integrations.openai import ChatGPT
+from agents.chat_agent import ChatAgent
+from consts import CHAT_INTRO_TEXT
 
 
-def execute():
-    agent = ChatGPT()
-
-    print("You are now chatting with a GPT powered chatbot. Type 'quit' to exit.")
+def main_console() -> None:
+    agent = ChatAgent()
+    print(CHAT_INTRO_TEXT)
+    print("Type 'quit' to exit.\n")
     while True:
         user_input = input("You: ").strip()
         if user_input.lower() in ["quit", "exit", "q"]:
@@ -17,29 +22,49 @@ def execute():
             continue
         elif user_input.lower() == "history":
             print("History:")
-            pprint(agent.history)
+            pprint(agent.chatbot.history)
             continue
 
         response = agent.send_message(user_input)
-        if not isinstance(response, str):
-            if agent.events:
-                response = agent.send_system_update(
-                    "Respond to the system events for the user."
-                    "The user does not see the events or know that they exist."
-                    "The user didn't cause the events. They were caused either by you or an external system."
-                    "It is likely that an event is the result of some action you did, for example loading a file."
-                    "You have to be very user friendly when summarizing the events for the user."
-                )
-                if not isinstance(response, str):
-                    raise Exception("Bot response should be a string after system update")
-        # response = agent.handle_parametrization_generation(user_input)
-        # response = agent.handle_priori_generation(user_input)
         print("Bot: " + response)
 
 
+def main_gui() -> None:
+    subprocess_env = os.environ.copy()
+    subprocess_env["PYTHONPATH"] = os.getcwd()
+
+    command = f"streamlit run frontend/main.py"
+    subprocess.run(command, shell=True, env=subprocess_env, cwd=os.getcwd())
+
+
+def execute(console_mode: bool = False, gui_mode: bool = False) -> None:
+    if console_mode:
+        main_console()
+    elif gui_mode:
+        main_gui()
+    else:
+        raise NotImplementedError("No mode selected! Please select either console or GUI mode (rerun with --help).")
+
+
 if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument(
+        '-c', '--console',
+        help="Run the bot in console mode.",
+        action='store_true', default=False
+    )
+    parser.add_argument(
+        '-g', '--gui',
+        help="Run the bot in GUI mode.",
+        action='store_true', default=False
+    )
+    args = parser.parse_args()
+
+    if args.console and args.gui:
+        raise ValueError("You cannot run the bot in both console and GUI mode at the same time (rerun with --help)!")
+
     try:
-        execute()
+        execute(console_mode=args.console, gui_mode=args.gui)
     except KeyboardInterrupt:
         pass
     print("\nExiting...")
