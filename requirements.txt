@@ -31,3 +31,4 @@ environs==9.5.0
 langchain==0.0.329
 flake8==6.1.0
 mypy==1.6.1
+streamlit==1.29.0

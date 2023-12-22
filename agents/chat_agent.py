@@ -1,26 +1,250 @@
+import io
+import json
+from contextlib import redirect_stdout
+from pathlib import Path
+from typing import Union, List
+
+from utils.util import generate_experiment_id
+from . import settings
+from . import consts
+from .consts import ResponseType
+from .utils import is_valid_python_code, compile_python_code
+from executable_scripts.plot_graphs import execute as plot
+from run_calculation import execute as run_experiment
 from llm_integrations.openai import ChatGPT
 
 
 class ChatAgent:
     def __init__(self, chatbot: ChatGPT = None):
-        if chatbot is None:
-            chatbot = ChatGPT()
-        self.chatbot = chatbot
-
-    def send_message(self, message: str) -> str:
-        response = self.chatbot.send_message(message)
-        if not isinstance(response, str):
-            if self.chatbot.events:
-                response = self.chatbot.send_system_update(
-                    "Respond to the system events for the user."
-                    "The user does not see the events or know that they exist."
-                    "The user didn't cause the events. They were caused either by you or an external system."
-                    "It is likely that an event is the result of some action you did, for example loading a file."
-                    "You have to be very user friendly when summarizing the events for the user."
-                )
-                if not isinstance(response, str):
-                    raise Exception("Bot response should be a string after system update")
-        return response
+        self.intro_prompt = consts.INTRO_PROMPT
+        self.history = []
+        self.events = []
+        self.pending_images = []
+        self.pending_data_tables = []
+        self.context = {
+            "last_message": "",
+            "result_info": {},
+        }
+        self.prompt_explanation = []
+        self.llm = ChatGPT(functions=consts.OPENAI_FUNCTIONS)
 
     def reset(self) -> None:
-        self.chatbot.reset()
+        self.history = []
+        self.events = []
+        self.pending_images = []
+        self.pending_data_tables = []
+        self.context = {
+            "last_message": "",
+            "result_info": {},
+        }
+        self.prompt_explanation = []
+
+    def send_message(self, message: str) -> str:
+        response = self.llm_complete(message, save_explanation=True)
+        response_type = self._process_response(response)
+        if response_type == ResponseType.FUNCTION:
+            # Notify the user about the function call
+            if self.events:
+                response_text = self.send_system_update(consts.SYSTEM_UPDATE_PROMPT)
+                self.history.append({"role": "assistant", "content": response_text})
+        elif response_type == ResponseType.NONE:
+            raise Exception("Empty response from OpenAI!")
+        elif response_type == ResponseType.TEXT:
+            response_text = response.content
+        return response_text
+
+    def llm_complete(
+            self, message: str, role: str = "user", ignore_events: bool = False, save_explanation: bool = False
+    ) -> dict:
+        messages = self._prepare_messages_and_events(message, role, ignore_events)
+        if save_explanation:
+            self.prompt_explanation = messages
+        response = self.llm.complete(messages)
+        if not response:
+            raise Exception("Empty response from OpenAI!")
+
+        return response
+
+    def _prepare_messages_and_events(self, message: str, role: str = "user", ignore_events: bool = False) -> List[dict]:
+        messages = []
+        messages.extend([
+            {"role": "system", "content": self.intro_prompt.format(**self.context)},
+        ])
+
+        if role == "user":
+            self.context["last_message"] = message
+            self.history.append({"role": role, "content": message})
+            messages.extend(self.history)
+            self.trim_history()
+        else:
+            messages.append({"role": role, "content": message})
+
+        if not ignore_events and len(self.events) > 0:
+            messages.extend([
+                {"role": "system", "content": f"A system event occurred: {event}"}
+                for event in self.events
+            ])
+            self.events = []
+
+        return messages
+
+    def _process_response(self, response: dict) -> ResponseType:
+        # Function call
+        if response.get("tool_calls", None):
+            functions = [tool_call["function"] for tool_call in response["tool_calls"]]
+            for function in functions:
+                self._handle_openai_function(function)
+            return ResponseType.FUNCTION
+        # Text response
+        else:
+            response_message = response.content
+
+            if not response_message:
+                return ResponseType.NONE
+
+            self.history.append({"role": "assistant", "content": response_message})
+
+            return ResponseType.TEXT
+
+    def send_system_update(self, message: str) -> Union[str, List[dict]]:
+        return self.llm_complete(message, role="system").content
+
+    def add_system_event(self, message: str) -> None:
+        self.events.append(message)
+
+    # Code generation functions
+
+    def _generate_code(self, message: str, system_prompt: str) -> str:
+        message = self.llm.complete(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": message}
+            ]
+        )
+        return message.content
+
+    def handle_parametrization_generation(self, message: str) -> str:
+        response = self._generate_code(message, settings.PARAMETRIZATION_GENERATION_SYSTEM_PROMPT)
+        return response
+
+    def handle_priori_generation(self, message: str) -> str:
+        response = self._generate_code(message, settings.PRIORI_GENERATION_SYSTEM_PROMPT)
+        return response
+
+    # OpenAI function implementations
+
+    def _handle_openai_function(self, function_call: dict) -> None:
+        name = function_call["name"]
+
+        if name == "python":
+            code = function_call["arguments"]
+            if not is_valid_python_code(code):
+                self.add_system_event(f"Invalid python code:\n{code}")
+                return
+
+            try:
+                output = io.StringIO()
+                with redirect_stdout(output):
+                    exec(compile_python_code(code))
+
+                self.add_system_event(f"Executed python code:\n{code}\nOutput:\n{output.getvalue()}")
+            except Exception as e:
+                self.add_system_event(f"Failed to execute python code:\n{code}\nException:\n{e}")
+                return
+        else:
+            params = {}
+            if function_call.get("arguments", None):
+                try:
+                    params = json.loads(function_call["arguments"])
+                except json.JSONDecodeError:
+                    self.add_system_event(
+                        f"Failed to parse parameters for function call {name}"
+                        f"with arguments {function_call['arguments']}"
+                    )
+                    return
+
+            if (function := getattr(self, name, None)) is not None:
+                function(**params)
+            else:
+                self.add_system_event(f"Unknown function call {name}")
+                return
+
+    def generate_parametrization(self, parametrization_function_in_latex: str) -> None:
+        self.add_system_event(self.handle_parametrization_generation(parametrization_function_in_latex))
+
+    def generate_priori(self) -> None:
+        self.add_system_event(self.handle_priori_generation(self.context["last_message"]))
+
+    def save_to_file(self, data: str, filename: str) -> None:
+        try:
+            with open(filename, "w") as f:
+                f.write(data)
+            self.add_system_event(f"Saved data to file {filename}")
+        except PermissionError:
+            self.add_system_event(f"Failed to save data to file {filename} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to save data to file {filename} with exception {e}")
+
+    def load_from_file(self, filename: str, characters: int = -1) -> None:
+        try:
+            with open(filename, "r") as f:
+                file_contents = f.read(characters)
+            self.add_system_event(f"Loaded file {filename} with the contents:\n{file_contents}")
+        except FileNotFoundError:
+            self.add_system_event(f"Failed to load file {filename} due to file not found error")
+        except PermissionError:
+            self.add_system_event(f"Failed to load file {filename} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to load file {filename} with exception {e}")
+
+    def inspect_directory(self, directory: str) -> None:
+        try:
+            contents = "\n".join([str(path) for path in Path(directory).iterdir()])
+            self.add_system_event(f"Inspected directory {directory} with the contents:\n{contents}")
+        except FileNotFoundError:
+            self.add_system_event(f"Failed to inspect directory {directory} due to file not found error")
+        except PermissionError:
+            self.add_system_event(f"Failed to inspect directory {directory} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to inspect directory {directory} with exception {e}")
+
+    def run_experiment(self, config_path: str, results_path: str) -> None:
+        try:
+            experiment_id = generate_experiment_id()
+            run_experiment(
+                workers=-1, config_path=config_path, results_path=results_path, experiment_id=experiment_id, quiet=True
+            )
+            self.context["result_info"] = {
+                "experiment_id": experiment_id,
+                "config_path": config_path,
+                "results_dir": results_path + "/" + experiment_id,
+            }
+            self.add_system_event(
+                f"Ran experiment according to config {config_path} with results saved to {results_path}/{experiment_id}"
+            )
+        except FileNotFoundError:
+            self.add_system_event(f"Failed to run experiment according to {config_path} due to file not found error")
+        except PermissionError:
+            self.add_system_event(f"Failed to run experiment according to {config_path} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to run experiment according to {config_path} with exception {e}")
+
+    def generate_graphs(self, experiment_path: str) -> None:
+        try:
+            plot(experiment_path)
+            self.add_system_event(f"Plotted from {experiment_path}")
+        except FileNotFoundError:
+            self.add_system_event(f"Failed to load results in {experiment_path} due to file not found error")
+        except PermissionError:
+            self.add_system_event(f"Failed to load results in {experiment_path} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to load results in {experiment_path} with exception {e}")
+
+    # Utils
+
+    def trim_history(self) -> None:
+        while self._get_history_length() > settings.MAX_HISTORY_LENGTH:
+            self.history.pop(0)
+
+    def _get_history_length(self) -> int:
+        return sum([len(message["content"]) for message in self.history])

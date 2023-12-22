@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 from argparse import ArgumentParser
 import traceback
+from typing import Optional
 
 import numpy as np
 import zeus
@@ -57,7 +58,7 @@ def log_posterior(params):
     )
 
 
-def execute(config_path: str, results_path: str, experiment_id: str, quiet: bool) -> None:
+def execute(config_path: str, results_path: str, experiment_id: Optional[str] = None, quiet: bool = False) -> None:
     global density_fn
     global E_fn
     global H

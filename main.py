@@ -22,7 +22,7 @@ def main_console() -> None:
             continue
         elif user_input.lower() == "history":
             print("History:")
-            pprint(agent.chatbot.history)
+            pprint(agent.history)
             continue
 
         response = agent.send_message(user_input)
@@ -33,7 +33,7 @@ def main_gui() -> None:
     subprocess_env = os.environ.copy()
     subprocess_env["PYTHONPATH"] = os.getcwd()
 
-    command = f"streamlit run frontend/main.py"
+    command = "streamlit run frontend/main.py"
     subprocess.run(command, shell=True, env=subprocess_env, cwd=os.getcwd())
 
 
@@ -43,7 +43,8 @@ def execute(console_mode: bool = False, gui_mode: bool = False) -> None:
     elif gui_mode:
         main_gui()
     else:
-        raise NotImplementedError("No mode selected! Please select either console or GUI mode (rerun with --help).")
+        print("No display mode selected. Defaulting to GUI mode...")
+        main_gui()
 
 
 if __name__ == "__main__":

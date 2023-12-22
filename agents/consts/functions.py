@@ -34,8 +34,38 @@ OPENAI_FUNCTIONS = [
         },
     },
     {
-        "name": "plot_graphs",
-        "description": "Generate several plots, including chain plots, corner plots, and density plots, "
+        "name": "inspect_directory",
+        "description": "Inspect the contents of a directory",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "directory": {
+                    "type": "string",
+                    "description": "The path to the directory to inspect",
+                },
+            },
+        },
+    },
+    {
+        "name": "run_experiment",
+        "description": "Run the MCMC simulation for the experiment specified in the configuration file",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "config_path": {
+                    "type": "string",
+                    "description": "The path to the experiment configuration file",
+                },
+                "results_path": {
+                    "type": "string",
+                    "description": "The path to the directory where the results will be saved",
+                },
+            },
+        },
+    },
+    {
+        "name": "generate_graphs",
+        "description": "Generate several plot images, including chain plots, corner plots, and density plots, "
                        "based on the data stored in the experiment results directory",
         "parameters": {
             "type": "object",

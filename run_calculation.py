@@ -3,12 +3,28 @@
 from argparse import ArgumentParser
 import os
 import subprocess
+from typing import Optional
 
 from models.experiment_config import ExperimentConfig
 from utils.util import generate_experiment_id, load_model
 
 
-def execute(workers: int, config_path: str, results_path: str, experiment_id: str, quiet: bool) -> None:
+def execute(
+        workers: int,
+        config_path: str,
+        results_path: str,
+        experiment_id: Optional[str] = None,
+        quiet: bool = False,
+) -> None:
+    # Validate arguments
+    config = load_model(ExperimentConfig, config_path)
+    if workers == -1:
+        workers = config.nchains
+    elif workers < config.nchains:
+        raise ValueError("Number of workers must be greater or equal to nchains!")
+
+    experiment_id = experiment_id if experiment_id else generate_experiment_id()
+
     # Run the experiment
     subprocess_env = os.environ.copy()
     subprocess_env["PYTHONPATH"] = os.getcwd()
@@ -52,22 +68,13 @@ if __name__ == "__main__":
         help='Turn off the progress bar.', action='store_true', default=False
     )
 
-    # Validate arguments
     args = parser.parse_args()
-
-    config = load_model(ExperimentConfig, args.config_path)
-    if args.workers == -1:
-        args.workers = config.nchains
-    elif args.workers < config.nchains:
-        raise ValueError("Number of workers must be greater or equal to nchains!")
-
-    experiment_id = args.experiment_id if args.experiment_id else generate_experiment_id()
 
     # Execute the experiment
     execute(
         workers=args.workers,
         config_path=args.config_path,
         results_path=args.results_path,
-        experiment_id=experiment_id,
+        experiment_id=args.experiment_id,
         quiet=args.quiet
     )
