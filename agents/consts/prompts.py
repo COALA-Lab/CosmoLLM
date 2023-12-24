@@ -193,4 +193,5 @@ SYSTEM_UPDATE_PROMPT = """
     The user didn't cause the events. They were caused either by you or an external system.
     It is likely that an event is the result of some action you did, for example loading a file.
     You have to be very user friendly when summarizing the events for the user.
+    Do not call any functions at this point! Answer only in text.
 """

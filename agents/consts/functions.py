@@ -34,6 +34,32 @@ OPENAI_FUNCTIONS = [
         },
     },
     {
+        "name": "display_image",
+        "description": "Display an image",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "image_path": {
+                    "type": "string",
+                    "description": "The path to the image to display",
+                },
+            },
+        },
+    },
+    {
+        "name": "display_data_table",
+        "description": "Display a table of data in various file formats (json, csv...)",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "data_table_path": {
+                    "type": "string",
+                    "description": "The data to display in the table",
+                },
+            },
+        },
+    },
+    {
         "name": "inspect_directory",
         "description": "Inspect the contents of a directory",
         "parameters": {

@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 from pprint import pprint
 
 from agents.chat_agent import ChatAgent
-from consts import CHAT_INTRO_TEXT
+from frontend.consts import CHAT_INTRO_TEXT
 
 
 def main_console() -> None:

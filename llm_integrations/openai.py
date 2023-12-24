@@ -17,9 +17,14 @@ class ChatGPT:
         openai.api_key = api_key or settings.OPENAI_API_KEY
 
     def complete(self, messages: List[dict]) -> dict:
-        return openai.ChatCompletion.create(
+        message = openai.ChatCompletion.create(
             model=self.model,
             messages=messages,
             tools=[{"type": "function", "function": function} for function in self.functions],
             tool_choice="auto",
         ).choices[0].message
+
+        if not message:
+            raise Exception("OpenAI returned an empty message.")
+
+        return message

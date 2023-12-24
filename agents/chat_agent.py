@@ -1,8 +1,11 @@
 import io
 import json
+import os
 from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Union, List
+
+from PIL import Image
 
 from utils.util import generate_experiment_id
 from . import settings
@@ -26,7 +29,7 @@ class ChatAgent:
             "result_info": {},
         }
         self.prompt_explanation = []
-        self.llm = ChatGPT(functions=consts.OPENAI_FUNCTIONS)
+        self.llm = chatbot or ChatGPT(functions=consts.OPENAI_FUNCTIONS)
 
     def reset(self) -> None:
         self.history = []
@@ -40,22 +43,32 @@ class ChatAgent:
         self.prompt_explanation = []
 
     def send_message(self, message: str) -> str:
+        if not message:
+            raise ValueError("Empty message!")
+
         response = self.llm_complete(message, save_explanation=True)
         response_type = self._process_response(response)
+        response_text = None
         if response_type == ResponseType.FUNCTION:
             # Notify the user about the function call
             if self.events:
                 response_text = self.send_system_update(consts.SYSTEM_UPDATE_PROMPT)
                 self.history.append({"role": "assistant", "content": response_text})
-        elif response_type == ResponseType.NONE:
-            raise Exception("Empty response from OpenAI!")
         elif response_type == ResponseType.TEXT:
             response_text = response.content
+        elif response_type == ResponseType.NONE:
+            raise Exception("Empty response from OpenAI!")
+
+        if not response_text:
+            raise Exception("Empty response from OpenAI!")
         return response_text
 
     def llm_complete(
             self, message: str, role: str = "user", ignore_events: bool = False, save_explanation: bool = False
     ) -> dict:
+        if not message:
+            raise ValueError("Empty message!")
+
         messages = self._prepare_messages_and_events(message, role, ignore_events)
         if save_explanation:
             self.prompt_explanation = messages
@@ -107,14 +120,33 @@ class ChatAgent:
             return ResponseType.TEXT
 
     def send_system_update(self, message: str) -> Union[str, List[dict]]:
-        return self.llm_complete(message, role="system").content
+        if not self.events:
+            raise ValueError("No pending events in the system!")
+        response = self.llm_complete(message, role="system")
+        if response and response.get("tool_calls", None):
+            raise Exception(
+                "System update prompt should not result in a function call! (function chaining not yet supported)"
+            )
+
+        response = response.content
+        if not response:
+            raise Exception("Empty response from OpenAI!")
+        return response
 
     def add_system_event(self, message: str) -> None:
+        if not message:
+            raise ValueError("Empty message!")
+
         self.events.append(message)
 
     # Code generation functions
 
     def _generate_code(self, message: str, system_prompt: str) -> str:
+        if not message:
+            raise ValueError("Empty message!")
+        if not system_prompt:
+            raise ValueError("Empty system prompt!")
+
         message = self.llm.complete(
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -177,6 +209,9 @@ class ChatAgent:
 
     def save_to_file(self, data: str, filename: str) -> None:
         try:
+            if not data:
+                raise ValueError("Empty data!")
+
             with open(filename, "w") as f:
                 f.write(data)
             self.add_system_event(f"Saved data to file {filename}")
@@ -197,6 +232,33 @@ class ChatAgent:
         except Exception as e:
             self.add_system_event(f"Failed to load file {filename} with exception {e}")
 
+    def display_image(self, image_path: str) -> None:
+        try:
+            Image.open(image_path)
+
+            self.pending_images.append(image_path)
+            self.add_system_event(f"Displayed image from {image_path}")
+        except FileNotFoundError:
+            self.add_system_event(f"Failed to display image from {image_path} due to file not found error")
+        except PermissionError:
+            self.add_system_event(f"Failed to display image from {image_path} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to display image from {image_path} with exception {e}")
+
+    def display_data_table(self, data_table_path: str) -> None:
+        try:
+            if not os.access(data_table_path, os.R_OK):
+                raise PermissionError
+
+            self.pending_data_tables.append(data_table_path)
+            self.add_system_event(f"Displayed data table from {data_table_path}")
+        except FileNotFoundError:
+            self.add_system_event(f"Failed to display data table from {data_table_path} due to file not found error")
+        except PermissionError:
+            self.add_system_event(f"Failed to display data table from {data_table_path} due to permission error")
+        except Exception as e:
+            self.add_system_event(f"Failed to display data table from {data_table_path} with exception {e}")
+
     def inspect_directory(self, directory: str) -> None:
         try:
             contents = "\n".join([str(path) for path in Path(directory).iterdir()])
@@ -210,6 +272,11 @@ class ChatAgent:
 
     def run_experiment(self, config_path: str, results_path: str) -> None:
         try:
+            if not config_path:
+                raise ValueError("Empty config path!")
+            if not results_path:
+                raise ValueError("Empty results path!")
+
             experiment_id = generate_experiment_id()
             run_experiment(
                 workers=-1, config_path=config_path, results_path=results_path, experiment_id=experiment_id, quiet=True
@@ -231,6 +298,9 @@ class ChatAgent:
 
     def generate_graphs(self, experiment_path: str) -> None:
         try:
+            if not experiment_path:
+                raise ValueError("Empty experiment path!")
+
             plot(experiment_path)
             self.add_system_event(f"Plotted from {experiment_path}")
         except FileNotFoundError:
@@ -247,4 +317,4 @@ class ChatAgent:
             self.history.pop(0)
 
     def _get_history_length(self) -> int:
-        return sum([len(message["content"]) for message in self.history])
+        return sum([len(message["content"]) for message in self.history] or 0)
