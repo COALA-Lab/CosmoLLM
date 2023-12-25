@@ -1,6 +1,6 @@
 [submodule "Pantheon"]
 	path = Pantheon
-	url = git@github.com:dscolnic/Pantheon.git
+	url = https://github.com/dscolnic/Pantheon.git
 [submodule "SNANA_StarterKit"]
 	path = SNANA_StarterKit
-	url = git@github.com:COALA-Lab/SNANA_StarterKit.git
+	url = https://github.com/COALA-Lab/SNANA_StarterKit.git
