@@ -33,7 +33,7 @@ def main_gui() -> None:
     subprocess_env = os.environ.copy()
     subprocess_env["PYTHONPATH"] = os.getcwd()
 
-    command = "streamlit run frontend/main.py"
+    command = "streamlit run --server.headless true --server.port 8000 frontend/main.py"
     subprocess.run(command, shell=True, env=subprocess_env, cwd=os.getcwd())
 
 
