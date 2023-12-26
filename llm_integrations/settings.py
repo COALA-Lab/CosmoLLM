@@ -2,9 +2,9 @@ import os
 
 from environs import Env
 
-
+root_dir = os.path.dirname(__file__) + "/.."
 env = Env()
-env.read_env(path=os.getcwd() + "/.env")
+env.read_env(path=root_dir + "/.env")
 
 
 # OpenAI

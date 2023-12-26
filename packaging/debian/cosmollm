@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /opt/cosmollm/main.py
+python3 /opt/cosmollm/main.py

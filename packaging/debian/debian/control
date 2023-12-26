@@ -1,0 +1,5 @@
+Package: cosmollm
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: CosmoLLM runtime package.
+    See https://github.com/COALA-Lab/CosmoLLM.git for more information.

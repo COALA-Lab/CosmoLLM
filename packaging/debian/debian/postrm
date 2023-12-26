@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+# Automatically added by the debhelper tool
+#DEBHELPER#
+
+case "$1" in
+    remove)
+        rm -rf /opt/cosmollm
+        ;;
+    purge)
+        rm -rf /opt/cosmollm
+        ;;
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        ;;
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+# End automatically added section
+
+exit 0

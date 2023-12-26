@@ -74,6 +74,11 @@ def add_message_to_history(role: str, content: Union[str, dict, list], content_t
     st.session_state.messages.append({"role": role, "content": content, "type": content_type})
 
 
+def clear_conversation() -> None:
+    st.session_state.messages = []
+    st.rerun()
+
+
 def main():
     if "agent" not in st.session_state:
         agent = ChatAgent()
@@ -95,11 +100,13 @@ def main():
 
         if user_input.lower() == "/reset":
             agent.reset()
-            display_message("system", "Resetting the chatbot")
+            clear_conversation()
             return
         elif user_input.lower() == "/explain":
             display_collection("system", agent.prompt_explanation)
             return
+        elif user_input.lower() == "/clear":
+            clear_conversation()
 
         with st.spinner("Responding..."):
             response = agent.send_message(user_input)

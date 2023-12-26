@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -e
+
+# Automatically added by the debhelper tool
+#DEBHELPER#
+
+case "$1" in
+    configure)
+        # Commands to run when the package is being configured
+        cd /opt/cosmollm
+        python3 -m venv venv
+        source venv/bin/activate
+        python3 -m pip install -r requirements.txt
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        # Optional handling for specific abort conditions
+        ;;
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+# End automatically added section
+
+exit 0
