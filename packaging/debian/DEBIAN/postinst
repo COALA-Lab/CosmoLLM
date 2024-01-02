@@ -9,7 +9,7 @@ case "$1" in
     configure)
         # Commands to run when the package is being configured
         cd /opt/cosmollm
-        python3 -m venv venv
+        python3 -m venv --system-site-packages venv
         . venv/bin/activate
         python3 -m pip install wheel
         env SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True python3 -m pip install -r requirements.txt
