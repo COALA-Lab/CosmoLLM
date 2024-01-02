@@ -10,8 +10,9 @@ case "$1" in
         # Commands to run when the package is being configured
         cd /opt/cosmollm
         python3 -m venv venv
-        source venv/bin/activate
-        python3 -m pip install -r requirements.txt
+        . venv/bin/activate
+        python3 -m pip install wheel
+        env SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True python3 -m pip install -r requirements.txt
         ;;
     abort-upgrade|abort-remove|abort-deconfigure)
         # Optional handling for specific abort conditions

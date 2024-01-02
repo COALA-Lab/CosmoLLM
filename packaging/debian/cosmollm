@@ -1,4 +1,5 @@
 #!/bin/bash
 
-cd /opt/cosmollm/main.py
-python3 /opt/cosmollm/main.py
+cd /opt/cosmollm/ || exit
+. venv/bin/activate
+python3 main.py

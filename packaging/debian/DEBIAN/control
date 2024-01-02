@@ -1,0 +1,7 @@
+Package: cosmollm
+Version: 1.0
+Architecture: amd64
+Depends: python3, python3-mpi4py, python3-venv, ssl-cert
+Description: CosmoLLM runtime package.
+    See https://github.com/COALA-Lab/CosmoLLM.git for more information.
+Maintainer: Nikola Sočec <nikola.socec@gmail.com>

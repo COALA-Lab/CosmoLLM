@@ -87,7 +87,7 @@ if __name__ == "__main__":
                   "Please rerun the command as `sudo` with the `--action set_api_key` flag.")
             exit(1)
 
-    if args.action.upper() == Actions.RUN.value:
+    elif args.action.upper() == Actions.RUN.value:
         if args.console and args.gui:
             raise ValueError("You cannot run the bot in both console and GUI mode "
                              "at the same time (rerun with --help)!")
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             pass
 
-    if args.action.upper() not in [action.value for action in Actions]:
+    elif args.action.upper() not in [action.value for action in Actions]:
         raise ValueError(f"Unsupported action: {args.action}\n"
                          f"Available actions: {', '.join([action.value for action in Actions])}")
 
