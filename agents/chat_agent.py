@@ -11,6 +11,7 @@ from utils.util import generate_experiment_id
 from . import settings
 from . import consts
 from .consts import ResponseType
+from .cosmo_state_machine import DefineFunctionState
 from .utils import is_valid_python_code, compile_python_code
 from executable_scripts.plot_graphs import execute as plot
 from run_calculation import execute as run_experiment
@@ -29,7 +30,8 @@ class ChatAgent:
             "result_info": {},
         }
         self.prompt_explanation = []
-        self.llm = chatbot or ChatGPT(functions=consts.OPENAI_FUNCTIONS)
+        self.llm = chatbot or ChatGPT()
+        self.state = DefineFunctionState()
 
     def reset(self) -> None:
         self.history = []
@@ -72,7 +74,7 @@ class ChatAgent:
         messages = self._prepare_messages_and_events(message, role, ignore_events)
         if save_explanation:
             self.prompt_explanation = messages
-        response = self.llm.complete(messages)
+        response = self.llm.complete(messages, self.state)
         if not response:
             raise Exception("Empty response from OpenAI!")
 
@@ -81,7 +83,7 @@ class ChatAgent:
     def _prepare_messages_and_events(self, message: str, role: str = "user", ignore_events: bool = False) -> List[dict]:
         messages = []
         messages.extend([
-            {"role": "system", "content": self.intro_prompt.format(**self.context)},
+            {"role": "system", "content": self.state.get_state_system_prompt().format(**self.context)},
         ])
 
         if role == "user":
@@ -148,10 +150,11 @@ class ChatAgent:
             raise ValueError("Empty system prompt!")
 
         message = self.llm.complete(
-            messages=[
+            [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": message}
-            ]
+            ],
+            self.state
         )
         return message.content
 
@@ -194,7 +197,7 @@ class ChatAgent:
                         f"with arguments {function_call['arguments']}"
                     )
                     return
-
+            print(params, name)
             if (function := getattr(self, name, None)) is not None:
                 function(**params)
             else:
