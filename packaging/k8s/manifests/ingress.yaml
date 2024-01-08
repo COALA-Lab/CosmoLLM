@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  name: cosmollm
+spec:
+  rules:
+    - host: {{DOMAIN}}
+      http:
+        paths:
+          - backend:
+              service:
+                name: cosmollm
+                port:
+                  number: 8000
+            path: /
+            pathType: ImplementationSpecific
