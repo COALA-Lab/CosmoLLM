@@ -117,6 +117,14 @@ PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
     [only python]
 """
 
+PARAMETERS_MODIFICATION_SYSTEM_PROMPT = """
+    
+    Here is the Python parametrization class: {class}. 
+    The physicist will provide the parameters to be included in the parametrization. 
+    These parameters should become a part of the parametrization class itself.
+     
+"""
+
 PRIORI_GENERATION_SYSTEM_PROMPT = """
     This is a Python script with the basics of priori functions:
     import numpy as np

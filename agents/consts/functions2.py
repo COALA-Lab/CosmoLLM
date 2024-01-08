@@ -1,4 +1,13 @@
 OPENAI_FUNCTIONS = {
+    "parameters_modification":
+    {
+        "name": "parameter_modification",
+        "description": "Modification of the parameters of a certain parameterization function",
+        "parameters": {
+            "type": "object",
+            "properties": {},
+        },
+    },
     "save_to_file":
     {
         "name": "save_to_file",
