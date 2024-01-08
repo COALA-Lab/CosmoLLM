@@ -42,9 +42,29 @@ class ChatAgent:
         }
         self.prompt_explanation = []
 
+    def save_state(self) -> None:
+        state = {
+            "history": self.history,
+            "events": self.events,
+            "context": self.context,
+        }
+        path = os.path.join(os.getcwd(), "data", "state.json")
+        with open(path, 'w') as f:
+            json.dump(state, f)
+
+    def load_state(self) -> None:
+        path = os.path.join(os.getcwd(), "data", "state.json")
+        with open(path, 'r') as f:
+            state = json.load(f)
+        self.history = state.history
+        self.events = state.events
+        self.context = state.context
+
     def send_message(self, message: str) -> str:
         if not message:
             raise ValueError("Empty message!")
+
+        self.save_state()
 
         response = self.llm_complete(message, save_explanation=True)
         response_type = self._process_response(response)
