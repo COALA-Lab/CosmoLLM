@@ -12,11 +12,11 @@ class Cyclic2:
         return Cyclic2()
 
     def eval(self, z: np.ndarray, params: np.ndarray) -> np.ndarray:
-        g = params[0, :].astype(np.float128)
-        a_max_to_mth = params[1, :].astype(np.float128)
-        m = params[2, :].astype(np.float128)
+        g = params[0, :]
+        a_max_to_mth = params[1, :]
+        m = params[2, :]
 
-        z_1_m = np.power(z+1, m).astype(np.float128)
+        z_1_m = np.power(z+1, m)
         # for i in range(len(a_max_to_mth)):
         #     print(f'{a_max[i]}**{m[i]}={a_max_to_mth[i]}')
         return 1 - g * z_1_m - 1.0/(z_1_m * a_max_to_mth) + g + 1.0/a_max_to_mth

@@ -119,9 +119,24 @@ PARAMETRIZATION_GENERATION_SYSTEM_PROMPT = """
 
 PARAMETERS_MODIFICATION_SYSTEM_PROMPT = """
     
-    Here is the Python parametrization class: {class}. 
+    Here is the Python parameterization class: {code}. 
     The physicist will provide the parameters to be included in the parametrization. 
     These parameters should become a part of the parametrization class itself.
+    In the python code where parameterization is defined as a class, 
+    recognize the parameters given to you by the physicist and create new parametrization class but 
+    replace the undefined parameters with those defined by the physicist. 
+    You should generate new Python code and ONLY output that Python code.
+    Even though the user only gives you parameters and doesn't mention that you're generating python code, 
+    generate it anyway.
+    
+"""
+
+PARAMETERS_MODIFICATION_SYSTEM_PROMPT2 = """
+     
+    This is a parameterization function written in latex: {function}. 
+    The physicist will give you the parameters of that function, which you must incorporate into the latex function. 
+    Give him back the same latex function with the parameters he gave you.
+    You should ONLY output the latex function with the parameters!
      
 """
 
@@ -202,4 +217,140 @@ SYSTEM_UPDATE_PROMPT = """
     It is likely that an event is the result of some action you did, for example loading a file.
     You have to be very user friendly when summarizing the events for the user.
     Do not call any functions at this point! Answer only in text.
+"""
+
+CONFIG_GENERATION_SYSTEM_PROMPT = """
+    You need to write a config json file depending on the prior and the parameterization function.
+    The following example shows what the config json file should look like to run the quadratic parameterization 
+    and with the matter.py prior selected.
+    Code will be enclosed between four hashtags, i.e., ####.
+    
+    Example:
+    
+    quadratic.py is an example parameterization class.
+    quadratic.py: 
+    ####
+    import numpy as np
+    from .parametrization_base import density_parametrization, BaseParametrization
+    
+    @density_parametrization('quadratic', num_of_params=2)
+    class Quadratic:
+
+    def __init__(self, max_redshift: float):
+        self.max_redshift = max_redshift
+
+    @classmethod
+    def create(cls, cosmo, max_redshift) -> 'BaseParametrization':
+        return Quadratic(max_redshift)
+
+    def eval(self, z: np.ndarray, x: np.ndarray) -> np.ndarray:
+        linear_part = (z * (4 * x[0] - x[1] - 3)) / self.max_redshift
+        quadratic_part = (
+            (2 * (z ** 2) * (2 * x[0] - x[1] - 1)) / (self.max_redshift ** 2))
+        return 1 + linear_part - quadratic_part
+    ####
+    
+    matter.py is an example prior.
+    matter.py
+    ####
+    from .priori_base import priori, PrioriContext, gaussian
+    
+    @priori('gauss')
+    def gauss_matter_priori(context: PrioriContext):
+    return gaussian(context.omega_m, 0.315, 0.021)
+    ####
+    
+    config_quadratic.json is an example of json you need to generate.
+    config_quadratic.json:
+    ####
+    {{
+         "name": "quadratic_interpolate",
+         "nwalkers": 20,
+         "nsteps": 50000,
+         "nchains": 2,
+         "parametrization": {{
+             "name": "quadratic",
+             "param_names": ["x1", "x2"]
+         }},
+         "max_redshift": 1.0,
+         "cosmo": "default",
+         "fits_path": {{
+             "fitres": "./Pantheon/data_fitres/Ancillary_C11.FITRES",
+             "sys": "./Pantheon/data_fitres/sys_full_long_C11.txt"
+         }},
+         "truth_values": "data/hubbles.csv",
+         "priors": {{
+             "matter": "gauss"
+         }}
+    }}
+    ####
+    
+    
+    The only thing that needs to be changed during generation are the values inside the "parametrization" and "priori" keys, 
+    the format of everything else is the same.
+
+    The value inside the "parametrization" key depends on the Parametrization class. 
+    The value "name" should be the first value within the class annotation (example: 'quadratic' in @density_parametrization('quadratic', num_of_params=2)). 
+    The value of the "param_names" key is a list of parameter names of the Parameterization class.
+
+    The value inside the "priori" key depends on the prior. It consists of a key which is the name of the file (example: matter in matter.py) 
+    and a value which is the value inside the annotation above the function (example: gauss in @priori('gauss'))
+    
+    Based of this parametrization class: {parametrization_class} and this prior: {prior} 
+    generate a json file in the same format as in the example.
+    Do not make a python code for this, just write json file as in the example with small changes.
+    
+"""
+
+ELEMENTS_PARAMETRIZATION = """
+
+    DONT MAKE CODE FOR THIS, JUST EXTRACT BY YOURSELF!
+    From this parametrization class code {parametrization_class}, 
+    extract The value "name" that should be the first value within the class annotation example: 
+    ('quadratic' in @density_parametrization('quadratic', num_of_params=2)) 
+    and the value "param_names" which is the list of parameter names of the Parameterization class. 
+    Number of elements of the list is always define within the class annotation as second value.
+    Your output should be in the same format as the result in the example, so json format with keys: "name" and "param_names"
+    
+    Here is an example of what you need to do:
+    Example:
+    quadratic.py is an example parameterization class code.
+    quadratic.py: 
+    ####
+    import numpy as np
+    from .parametrization_base import density_parametrization, BaseParametrization
+    
+    @density_parametrization('quadratic', num_of_params=2)
+    class Quadratic:
+
+    def __init__(self, max_redshift: float):
+        self.max_redshift = max_redshift
+
+    @classmethod
+    def create(cls, cosmo, max_redshift) -> 'BaseParametrization':
+        return Quadratic(max_redshift)
+
+    def eval(self, z: np.ndarray, x: np.ndarray) -> np.ndarray:
+        linear_part = (z * (4 * x[0] - x[1] - 3)) / self.max_redshift
+        quadratic_part = (
+            (2 * (z ** 2) * (2 * x[0] - x[1] - 1)) / (self.max_redshift ** 2))
+        return 1 + linear_part - quadratic_part
+    ####
+    
+    example result of previous quadratic.py:
+    ####
+    "name": "quadratic"
+    "param_names": ["x[0]", "x[1]"]
+    ####
+"""
+
+
+ELEMENTS_PRIOR = """
+
+    DONT MAKE CODE FOR THIS, JUST EXTRACT BY YOURSELF!
+    From this prior code {prior_content} a value which is inside the annotation above the function 
+    (example: gauss in @priori('gauss')). From the name of prior file {prior_filename} extract extract just the name without the .py
+    (example: density in density.py)
+    
+    
 """

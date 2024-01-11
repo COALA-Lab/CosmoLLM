@@ -1,11 +1,79 @@
 OPENAI_FUNCTIONS = {
+    "result_path_selected" :
+    {
+        "name": "result_path_selected",
+        "description": "The result path is selected",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "result_path": {
+                    "type": "string",
+                    "description": "Result path that is selected",
+                },
+            }
+        },
+    },
+    "config_selected" :
+    {
+        "name": "config_selected",
+        "description": "The config path is selected",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "config_filename": {
+                    "type": "string",
+                    "description": "Name of the file of the config that is selected",
+                },
+            }
+        },
+    },
+    "start_calculation":
+    {
+        "name": "start_calculation",
+        "description": "Activating the state of the system in which the experiment is started",
+        "parameters": {
+            "type": "object",
+            "properties": {
+            }
+        },
+    },
+    "prior_selection":
+    {
+        "name": "prior_selection",
+        "description": "Selection of the prior file that will be used in the calculation",
+        "parameters": {
+            "type": "object",
+            "properties": {
+            }
+        },
+    },
+    "prior_selected":
+        {
+            "name": "prior_selected",
+            "description": "User selected the prior",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "prior_file": {
+                        "type": "string",
+                        "description": "Name of the file of the prior that is selected",
+                    },
+                },
+
+            },
+        },
     "parameters_modification":
     {
-        "name": "parameter_modification",
+        "name": "parameters_modification",
         "description": "Modification of the parameters of a certain parameterization function",
         "parameters": {
             "type": "object",
-            "properties": {},
+            "properties": {
+                "parameters": {
+                    "type": "string",
+                    "description": "Parameters of parametrization",
+                },
+            },
         },
     },
     "save_to_file":

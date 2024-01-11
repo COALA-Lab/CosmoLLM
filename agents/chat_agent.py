@@ -11,7 +11,7 @@ from utils.util import generate_experiment_id
 from . import settings
 from . import consts
 from .consts import ResponseType
-from .cosmo_state_machine import DefineFunctionState
+from .cosmo_state_machine import DefineFunctionState, SelectionPriorState, ComputationState
 from .utils import is_valid_python_code, compile_python_code, save_py_script
 from executable_scripts.plot_graphs import execute as plot
 from run_calculation import execute as run_experiment
@@ -34,7 +34,13 @@ class ChatAgent:
         self.llm = chatbot or ChatGPT()
         self.state = DefineFunctionState()
         self.param_code = str
-        self.parm_path = str
+        self.param_code1 = str
+        self.param_path = str
+        self.param_path1 = str
+        self.latex_function = str
+        self.prior = str
+        self.config = str
+        self.result_path = str
 
     def reset(self) -> None:
         self.history = []
@@ -51,7 +57,7 @@ class ChatAgent:
         if not message:
             raise ValueError("Empty message!")
 
-        response = self.llm_complete(message, save_explanation=True)
+        response = self.llm_complete(message, save_explanation=True) #res1
         response_type = self._process_response(response)
         response_text = None
         if response_type == ResponseType.FUNCTION:
@@ -136,6 +142,8 @@ class ChatAgent:
         if not self.events:
             raise ValueError("No pending events in the system!")
         response = self.llm_complete(message, role="system")
+        print("response1: ", response)
+        print("response.get(tool_calls, None) ", response.get("tool_calls", None))
         if response and response.get("tool_calls", None):
             raise Exception(
                 "System update prompt should not result in a function call! (function chaining not yet supported)"
@@ -182,6 +190,8 @@ class ChatAgent:
     def handle_parametrization_generation(self, message: str) -> str:
         response = self._generate_code(message, settings.PARAMETRIZATION_GENERATION_SYSTEM_PROMPT, "parametrization")
         self.param_code = response
+        print("ooo ", response)
+        self.latex_function = message
         return response
 
     def handle_priori_generation(self, message: str) -> str:
@@ -227,8 +237,59 @@ class ChatAgent:
                 return
 
     def generate_parametrization(self, parametrization_function_in_latex: str) -> None:
+        #self.state = DefineFunctionState()
         code = self.handle_parametrization_generation(parametrization_function_in_latex)
-        self.add_system_event(f"Generate parametrization code {code}")
+        self.add_system_event(f"Generated parametrization code {code} in path {self.param_path}")
+
+    def prior_selection(self) -> None:
+        self.state = SelectionPriorState()
+        self.context["result_info"] = {
+            "directory": "priori"
+        }
+        self.add_system_event(f"{self.state.get_state_system_prompt().format(**self.context)}")
+
+    def prior_selected(self, prior_file):
+        self.prior = prior_file
+        self.add_system_event(f"Prior is selected, it is: {prior_file}!")
+
+    def config_selected(self, config_filename):
+        self.config = config_filename
+        self.add_system_event(f"Config is selected, it is: {config_filename}")
+
+    def result_path_selected(self, result_path):
+        self.result_path = result_path
+        self.add_system_event(f"Result path is selected, it is: {result_path}")
+        self.run_experiment(config_path=self.config, results_path=self.result_path)
+
+    def start_calculation(self):
+        self.state = ComputationState()
+        self.add_system_event(f"{self.state.get_state_system_prompt().format(**self.context)}")
+
+    # def start_calculation(self):
+    #     self.state = DefineConfig()
+    #     response1 = self.llm.complete(
+    #         [
+    #             {"role": "system", "content": consts.ELEMENTS_PARAMETRIZATION.format(parametrization_class=self.param_code)},
+    #         ],
+    #         self.state
+    #     )
+    #     print("response1", response1.content)
+    #
+    #     characters: int = -1
+    #     try:
+    #         with open(self.prior, "r") as f:
+    #             file_contents = f.read(characters)
+    #             response2 = self.llm.complete(
+    #                 [
+    #                     {"role": "system", "content": consts.ELEMENTS_PRIOR.format(prior_filename=self.prior, prior_content=file_contents)},
+    #                 ],
+    #                 self.state
+    #             )
+    #             print("response2 ", response2.content)
+    #     except Exception as e:
+    #         raise ValueError("Failed to load!")
+
+
 
     def generate_priori(self) -> None:
         self.add_system_event(self.handle_priori_generation(self.context["last_message"]))
@@ -285,13 +346,50 @@ class ChatAgent:
         except Exception as e:
             self.add_system_event(f"Failed to display data table from {data_table_path} with exception {e}")
 
-    def parameters_modification(self):
+    def handle_parameters_modification(self, message: str) -> str:
+        function = self.latex_function
+        code = self.param_code
+        response = self.llm.complete(
+            [
+                {"role": "system", "content": consts.PARAMETERS_MODIFICATION_SYSTEM_PROMPT.format(code=code)},
+                {"role": "user", "content": message}
+            ],
+            self.state
+        )
+        print("eee ", response)
+        if response.get("tool_calls", None):
+            functions = [tool_call["function"] for tool_call in response["tool_calls"]]
+            for function in functions:
+                if function["name"] == "python":
+                    code1 = function["arguments"]
+                    if not is_valid_python_code(code1):
+                        print("2222")
+                        self.add_system_event(f"Invalid python code:\n{code1}")
+                        return
+                    print("self.param_path1 ", self.param_path1)
+                    self.param_path1 = save_py_script(code1, "parametrization")
+                    return code1
+
+
+    def parameters_modification(self, parameters: str):
+        """
+        print("ssss")
         if not self.param_code:
             raise ValueError("Empty code!")
-        self.add_system_event(f"Parameters added to parametrization class: {self.param_code}")
+
+        code = self.param_code
+        function = self.latex_function
+        self.history.append({"role": "system", "content": consts.PARAMETERS_MODIFICATION_SYSTEM_PROMPT2.format(function=function)})
+        self.history.append({"role": "user", "content": parameters})
+        self.add_system_event(f"Parameters added to parametrization class: {parameters}")
+
         if not self.param_path:
             raise ValueError("Empty path!")
-        return
+        """
+        code = self.handle_parameters_modification(parameters)
+        self.param_code1 = code
+        self.add_system_event(f"New code {code} with parameters {parameters} in path {self.param_path1}")
+
 
 
     def inspect_directory(self, directory: str) -> None:
