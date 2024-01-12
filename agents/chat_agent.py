@@ -31,6 +31,8 @@ class ChatAgent:
         self.prompt_explanation = []
         self.llm = chatbot or ChatGPT(functions=consts.OPENAI_FUNCTIONS)
 
+        self.load_state()
+
     def reset(self) -> None:
         self.history = []
         self.events = []
@@ -41,6 +43,10 @@ class ChatAgent:
             "result_info": {},
         }
         self.prompt_explanation = []
+
+        path = os.path.join(os.getcwd(), "data", "state.json")
+        if os.path.exists(path):
+            os.remove(path)
 
     def save_state(self) -> None:
         state = {
@@ -54,11 +60,13 @@ class ChatAgent:
 
     def load_state(self) -> None:
         path = os.path.join(os.getcwd(), "data", "state.json")
+        if not os.path.exists(path):
+            return
         with open(path, 'r') as f:
             state = json.load(f)
-        self.history = state.history
-        self.events = state.events
-        self.context = state.context
+        self.history = state["history"]
+        self.events = state["events"]
+        self.context = state["context"]
 
     def send_message(self, message: str) -> str:
         if not message:

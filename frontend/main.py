@@ -80,18 +80,21 @@ def clear_conversation() -> None:
 
 
 def main():
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
     if "agent" not in st.session_state:
         agent = ChatAgent()
         st.session_state.agent = agent
+
+        for message in agent.history:
+            add_message_to_history(message["role"], message["content"], ContentType.TEXT)
     else:
         agent = st.session_state.agent
 
     st.title("Cosmo LLM")
 
     display_message("system", CHAT_INTRO_TEXT, save_to_history=False)
-
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
 
     display_past_conversation()
 
