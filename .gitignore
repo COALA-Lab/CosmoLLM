@@ -12,3 +12,4 @@ output
 build
 dist
 *.spec
+state.json
