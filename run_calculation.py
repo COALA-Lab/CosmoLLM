@@ -30,7 +30,7 @@ def execute(
     subprocess_env["PYTHONPATH"] = os.getcwd()
 
     command = (
-        f"mpiexec --allow-run-as-root -n {workers} python3 executable_scripts/run_experiment.py {config_path} "
+        f"mpiexec  -n {workers} python3 executable_scripts/run_experiment.py {config_path} "
         f"--results-path {results_path} --experiment-id {experiment_id}"
     )
     if quiet:

@@ -5,7 +5,7 @@ from argparse import ArgumentParser
 from enum import Enum
 from pprint import pprint
 
-from agents.chat_agent import ChatAgent
+from agents.chat_agent1 import ChatAgent
 from frontend.consts import CHAT_INTRO_TEXT
 from llm_integrations import settings as llm_settings
 

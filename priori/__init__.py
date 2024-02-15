@@ -6,7 +6,7 @@ import inspect
 
 from .priori_base import PrioriFunction, PrioriContext  # noqa: F401
 
-PRIORIS_DIRECTORY = "priori"
+PRIORIS_DIRECTORY = Path(__file__).parent.absolute()
 _IGNORE_FILES = {"__init__.py", "priori_base.py"}
 
 
@@ -27,10 +27,14 @@ def _all_prioris():
     prioris = {}
     for filename in glob.glob(f"{PRIORIS_DIRECTORY}/*.py", recursive=False):
         module_path = Path(filename)
+        #print("module_path ", module_path)
         if module_path.name not in _IGNORE_FILES:
             module = _import_module(filename, module_path.stem)
             for _, member in inspect.getmembers(module, inspect.isclass):
+                #print("member", member)
+                #print("member.__mro__ ", member.__mro__)
                 if issubclass(member, PrioriFunction):
+                    #print("member2", member)
                     priori_registry = prioris.get(module_path.stem, {})
                     priori_registry[member.name] = member
                     prioris[module_path.stem] = priori_registry
@@ -39,9 +43,14 @@ def _all_prioris():
 
 _ALL_PRIORIS = _all_prioris()
 
-
 def available_prioris():
+    global _ALL_PRIORIS
+    _ALL_PRIORIS = _all_prioris()  # Ponovno učitavanje priori
+    #print("_ALL_PRIORIS", _ALL_PRIORIS)
     return {registry: set(prioris.keys()) for registry, prioris in _ALL_PRIORIS.items()}
+
+# def  available_prioris():
+#     return {registry: set(prioris.keys()) for registry, prioris in _ALL_PRIORIS.items()}
 
 
 def get_priori(registry_name: str, priori_name: str):

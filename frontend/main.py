@@ -3,7 +3,7 @@ from typing import Union
 import pandas as pd
 import streamlit as st
 
-from agents.chat_agent import ChatAgent
+from agents.chat_agent1 import ChatAgent
 from consts import CHAT_INTRO_TEXT, ContentType
 
 

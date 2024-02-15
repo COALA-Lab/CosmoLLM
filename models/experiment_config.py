@@ -98,7 +98,11 @@ class ExperimentConfig(BaseModel):
     @validator("priori")
     def all_priori_available(cls, prioris):
         valid_prioris = available_prioris()
+        print("valid_prioris ", valid_prioris)
         for key, val in prioris.items():
+            print("prioris_k", key)
+            print("prioris_v", val)
+            print("valid_prioris.get(key, {}) ", valid_prioris.get(key, {}))
             if val not in valid_prioris.get(key, {}):
                 raise ValueError(
                     f"All prioris must be from the following available ones: {valid_prioris}"
