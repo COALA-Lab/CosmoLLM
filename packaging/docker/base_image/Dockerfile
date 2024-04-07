@@ -19,7 +19,4 @@ RUN git clone https://github.com/COALA-Lab/CosmoLLM.git . --recursive
 
 RUN SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True pip install -r requirements.txt
 
-ARG OPENAI_API_KEY=""
-RUN echo "OPENAI_API_KEY=$OPENAI_API_KEY" > .env
-
 CMD ["python3", "/app/main.py"]
