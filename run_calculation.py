@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-
+import tempfile
 from argparse import ArgumentParser
 import os
 import subprocess
 from typing import Optional
 
+import settings
 from models.experiment_config import ExperimentConfig
 from utils.util import generate_experiment_id, load_model
 
@@ -33,8 +34,19 @@ def execute(
 
     command = (
         f"mpiexec -n {workers} python3 executable_scripts/run_experiment.py {config_path} "
-        f"--results-path {results_path} --experiment-id {experiment_id}"
+        f"--results-path {results_path} --experiment-id {experiment_id} "
     )
+
+    if settings.MPI_HOSTS:
+        hostfile = None
+        with tempfile.NamedTemporaryFile(delete=True) as temp_file:
+            hostfile = temp_file.name
+
+            for host in settings.MPI_HOSTS:
+                temp_file.write(f"{host}\n".encode())
+
+        command += f"--hostfile {hostfile} "
+
     if quiet:
         command += " -q"
     result = subprocess.run(command, shell=True, env=subprocess_env, cwd=os.getcwd())

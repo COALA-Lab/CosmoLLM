@@ -1,13 +1,10 @@
-import json
 import os
 import subprocess
 from argparse import ArgumentParser
 from enum import Enum
 from pprint import pprint
-from typing import Optional
 
 from agents.chat_agent import ChatAgent
-from executable_scripts.run_experiment import execute as run_experiment
 from frontend.consts import CHAT_INTRO_TEXT
 
 root_dir = os.path.dirname(__file__)
