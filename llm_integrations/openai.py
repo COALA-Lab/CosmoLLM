@@ -1,3 +1,4 @@
+import sys
 from typing import List, Optional
 
 import openai
@@ -14,7 +15,12 @@ class ChatGPT:
     ) -> None:
         self.model = model or settings.OPENAI_CHAT_GPT_MODEL
         self.functions = functions or []
-        openai.api_key = api_key or settings.OPENAI_API_KEY
+        api_key = api_key or settings.OPENAI_API_KEY
+
+        if not openai.api_key:
+            raise ValueError("OpenAI API key not found! Please set it in the environment.")
+
+        openai.api_key = api_key
 
     def complete(self, messages: List[dict]) -> dict:
         message = openai.ChatCompletion.create(

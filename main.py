@@ -1,13 +1,14 @@
+import json
 import os
 import subprocess
-
 from argparse import ArgumentParser
 from enum import Enum
 from pprint import pprint
+from typing import Optional
 
 from agents.chat_agent import ChatAgent
+from executable_scripts.run_experiment import execute as run_experiment
 from frontend.consts import CHAT_INTRO_TEXT
-from llm_integrations import settings as llm_settings
 
 root_dir = os.path.dirname(__file__)
 
@@ -72,10 +73,11 @@ if __name__ == "__main__":
         '-a', '--action',
         help="Select the action to perform.",
         default=Actions.RUN.value,
+        choices=[action.value for action in Actions]
     )
     args = parser.parse_args()
 
-    if args.action.upper() == Actions.SET_API_KEY.value or not llm_settings.OPENAI_API_KEY:
+    if args.action.upper() == Actions.SET_API_KEY.value:
         api_key = input("Enter your OpenAI API key: ")
         file_location = root_dir + "/.env"
         try:
@@ -95,8 +97,7 @@ if __name__ == "__main__":
             execute(console_mode=args.console, gui_mode=args.gui)
         except KeyboardInterrupt:
             pass
-
-    elif args.action.upper() not in [action.value for action in Actions]:
+    else:
         raise ValueError(f"Unsupported action: {args.action}\n"
                          f"Available actions: {', '.join([action.value for action in Actions])}")
 
