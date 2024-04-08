@@ -28,27 +28,35 @@ def execute(
 
     # Run the experiment
     subprocess_env = os.environ.copy()
-    subprocess_env["PYTHONPATH"] = os.getcwd()
-    subprocess_env["OMPI_ALLOW_RUN_AS_ROOT"] = "1"
-    subprocess_env["OMPI_ALLOW_RUN_AS_ROOT_CONFIRM"] = "1"
+    extra_env_vars = {
+        "PYTHONPATH": os.getcwd(),
+        "OMPI_ALLOW_RUN_AS_ROOT": "1",
+        "OMPI_ALLOW_RUN_AS_ROOT_CONFIRM": "1",
+    }
+    subprocess_env.update(extra_env_vars)
 
-    command = (
-        f"mpiexec -n {workers} python3 executable_scripts/run_experiment.py {config_path} "
-        f"--results-path {results_path} --experiment-id {experiment_id} "
-    )
-
+    mpi_command = f"mpiexec -n {workers} "
     if settings.MPI_HOSTS:
         hostfile = None
-        with tempfile.NamedTemporaryFile(delete=True) as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             hostfile = temp_file.name
 
             for host in settings.MPI_HOSTS:
                 temp_file.write(f"{host}\n".encode())
 
-        command += f"--hostfile {hostfile} "
+        mpi_command += f"--hostfile {hostfile} "
 
+        for key, value in extra_env_vars.items():
+            mpi_command += f"-x {key}={value} "
+
+    cosmollm_command = (
+        f"python3 executable_scripts/run_experiment.py {config_path} "
+        f"--results-path {results_path} --experiment-id {experiment_id} "
+    )
     if quiet:
-        command += " -q"
+        cosmollm_command += " -q"
+
+    command = mpi_command + cosmollm_command
     result = subprocess.run(command, shell=True, env=subprocess_env, cwd=os.getcwd())
     if result.returncode != 0:
         raise RuntimeError("Experiment failed!")
