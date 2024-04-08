@@ -20,4 +20,6 @@ RUN git clone https://github.com/COALA-Lab/CosmoLLM.git . --recursive --branch f
 
 RUN SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True pip install -r requirements.txt
 
-CMD ["python3", "/app/main.py"]
+COPY entrypoint.sh /home/cosmollm
+
+CMD ["/home/cosmollm/entrypoint.sh"]

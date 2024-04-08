@@ -9,7 +9,10 @@ if [ -n "$SSH_PUBLIC_KEY" ]; then
     echo "$SSH_PUBLIC_KEY" > "$HOME_DIR/.ssh/authorized_keys"
     chmod 700 "$HOME_DIR/.ssh"
     chmod 600 "$HOME_DIR/.ssh/authorized_keys"
+
+    echo "Changing ownerships..."
     chown -R cosmollm:cosmollm "$HOME_DIR"
+    echo "Done"
 fi
 
 /usr/sbin/sshd -D -e
