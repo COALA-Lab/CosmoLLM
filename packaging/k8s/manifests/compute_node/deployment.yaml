@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
+  name: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
+spec:
+  selector:
+    matchLabels:
+      app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
+  template:
+    metadata:
+      labels:
+        app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
+    spec:
+      containers:
+        - image: {{IMAGE}}
+          imagePullPolicy: IfNotPresent
+          name: cosmollm-compute
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: cosmollm-{{ID}}
+
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always

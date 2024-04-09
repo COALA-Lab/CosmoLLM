@@ -1,9 +1,9 @@
 #!/bin/bash
 
+HOME_DIR=/home/cosmollm
+
 if [ -n "$SSH_PUBLIC_KEY" ]; then
     echo "Setting up SSH public key"
-
-    HOME_DIR=/home/cosmollm
 
     mkdir -p "$HOME_DIR/.ssh"
     echo "$SSH_PUBLIC_KEY" > "$HOME_DIR/.ssh/authorized_keys"

@@ -2,26 +2,32 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: cosmollm
-  name: cosmollm
+    app: cosmollm-gui-{{ID}}
+  name: cosmollm-gui-{{ID}}
 spec:
   selector:
     matchLabels:
-      app: cosmollm
+      app: cosmollm-gui-{{ID}}
   template:
     metadata:
       labels:
-        app: cosmollm
+        app: cosmollm-gui-{{ID}}
     spec:
       containers:
         - image: {{IMAGE}}
           imagePullPolicy: IfNotPresent
-          name: cosmollm
+          name: cosmollm-gui
           ports:
             - containerPort: 8000
               protocol: TCP
           env:
             - name: OPENAI_API_KEY
               value: {{TOKEN}}
+            - name: MPI_HOSTS
+              value: {{MPI_HOSTS}}
+          envFrom:
+            - secretRef:
+                name: cosmollm-{{ID}}
+
       dnsPolicy: ClusterFirst
       restartPolicy: Always
