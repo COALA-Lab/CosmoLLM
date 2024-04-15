@@ -6,6 +6,7 @@ RUN apt-get install -y python3-dev python3-pip python3-mpi4py git sudo
 RUN addgroup --gid 1000 cosmollm && \
     adduser --uid 1000 --gid 1000 --disabled-password --gecos "" cosmollm && \
     echo 'cosmollm ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+RUN chown -R cosmollm:cosmollm /home/cosmollm
 
 RUN mkdir /app
 WORKDIR /app
