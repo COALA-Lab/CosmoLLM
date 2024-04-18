@@ -3,7 +3,26 @@ from argparse import ArgumentParser
 from utils import create_namespace, render_and_apply
 
 
-def main():
+def execute(
+        deployment_id: str,
+        namespace: str,
+        image: str,
+        domain: str,
+        token: str,
+        mpi_hosts: str
+) -> None:
+    create_namespace(namespace)
+
+    render_and_apply("manifests/gui_node", namespace, {
+        "ID": deployment_id,
+        "IMAGE": image,
+        "DOMAIN": domain,
+        "TOKEN": token,
+        "MPI_HOSTS": mpi_hosts,
+    })
+
+
+if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument(
         '--id',
@@ -45,16 +64,11 @@ def main():
     token = args.token
     mpi_hosts = args.mpi_hosts
 
-    create_namespace(namespace)
-
-    render_and_apply("manifests/gui_node", namespace, {
-        "ID": deployment_id,
-        "IMAGE": image,
-        "DOMAIN": domain,
-        "TOKEN": token,
-        "MPI_HOSTS": mpi_hosts,
-    })
-
-
-if __name__ == '__main__':
-    main()
+    execute(
+        deployment_id=deployment_id,
+        namespace=namespace,
+        image=image,
+        domain=domain,
+        token=token,
+        mpi_hosts=mpi_hosts,
+    )

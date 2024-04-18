@@ -4,7 +4,35 @@ from argparse import ArgumentParser
 from utils import create_namespace, render_and_apply
 
 
-def main():
+def execute(
+        deployment_id: str,
+        namespace: str,
+        mpi_host_slots: int,
+        ssh_public_key_path: str = None,
+        ssh_private_key_path: str = None
+) -> None:
+
+    ssh_public_key = ""
+    ssh_private_key = ""
+    if ssh_public_key_path and ssh_private_key_path:
+        with open(ssh_public_key_path) as f:
+            ssh_public_key = f.read()
+            ssh_public_key = base64.b64encode(ssh_public_key.encode()).decode()
+        with open(ssh_private_key_path) as f:
+            ssh_private_key = f.read()
+            ssh_private_key = base64.b64encode(ssh_private_key.encode()).decode()
+
+    create_namespace(namespace)
+
+    render_and_apply("manifests/config", namespace, {
+        "ID": deployment_id,
+        "MPI_HOST_SLOTS": str(mpi_host_slots),
+        "SSH_PUBLIC_KEY": ssh_public_key,
+        "SSH_PRIVATE_KEY": ssh_private_key
+    })
+
+
+if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument(
         '--id',
@@ -36,29 +64,14 @@ def main():
     args = parser.parse_args()
     deployment_id = args.id
     namespace = args.namespace
-    mpi_host_slots = str(args.mpi_host_slots)
+    mpi_host_slots = args.mpi_host_slots
     ssh_public_key_path = args.ssh_public_key_path
     ssh_private_key_path = args.ssh_private_key_path
 
-    ssh_public_key = ""
-    ssh_private_key = ""
-    if ssh_public_key_path and ssh_private_key_path:
-        with open(ssh_public_key_path) as f:
-            ssh_public_key = f.read()
-            ssh_public_key = base64.b64encode(ssh_public_key.encode()).decode()
-        with open(ssh_private_key_path) as f:
-            ssh_private_key = f.read()
-            ssh_private_key = base64.b64encode(ssh_private_key.encode()).decode()
-
-    create_namespace(namespace)
-
-    render_and_apply("manifests/config", namespace, {
-        "ID": deployment_id,
-        "MPI_HOST_SLOTS": mpi_host_slots,
-        "SSH_PUBLIC_KEY": ssh_public_key,
-        "SSH_PRIVATE_KEY": ssh_private_key
-    })
-
-
-if __name__ == '__main__':
-    main()
+    execute(
+        deployment_id=deployment_id,
+        namespace=namespace,
+        mpi_host_slots=mpi_host_slots,
+        ssh_public_key_path=ssh_public_key_path,
+        ssh_private_key_path=ssh_private_key_path,
+    )

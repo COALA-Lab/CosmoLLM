@@ -29,6 +29,9 @@ spec:
             limits:
               cpu: "{{CPU_LIMIT}}"
               memory: "{{MEMORY_LIMIT}}"
+            requests:
+              cpu: "{{CPU_REQUEST}}"
+              memory: "{{MEMORY_REQUEST}}"
 
       dnsPolicy: ClusterFirst
       restartPolicy: Always
