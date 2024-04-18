@@ -11,6 +11,11 @@ def main():
         required=True
     )
     parser.add_argument(
+        '-n', '--namespace',
+        help="Namespace to deploy to",
+        required=True
+    )
+    parser.add_argument(
         '-i', '--image',
         help="Docker image to deploy",
         required=True
@@ -21,22 +26,24 @@ def main():
         required=True
     )
     parser.add_argument(
-        '-n', '--namespace',
-        help="Namespace to deploy to",
-        required=True
-    )
-    parser.add_argument(
         '-t', '--token',
         help="OpenAI token",
         required=True
     )
+    parser.add_argument(
+        '--mpi-hosts',
+        help="MPI hosts (comma separated string)",
+        required=False,
+        default=""
+    )
 
     args = parser.parse_args()
     deployment_id = args.id
+    namespace = args.namespace
     image = args.image
     domain = args.domain
-    namespace = args.namespace
     token = args.token
+    mpi_hosts = args.mpi_hosts
 
     create_namespace(namespace)
 
@@ -45,6 +52,7 @@ def main():
         "IMAGE": image,
         "DOMAIN": domain,
         "TOKEN": token,
+        "MPI_HOSTS": mpi_hosts,
     })
 
 

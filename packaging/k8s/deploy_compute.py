@@ -11,6 +11,11 @@ def main():
         required=True
     )
     parser.add_argument(
+        '-n', '--namespace',
+        help="Namespace to deploy to",
+        required=True
+    )
+    parser.add_argument(
         '--compute-id',
         help="ID of the compute deployment",
         required=True
@@ -21,16 +26,25 @@ def main():
         required=True
     )
     parser.add_argument(
-        '-n', '--namespace',
-        help="Namespace to deploy to",
-        required=True
+        '--cpu',
+        help="CPU resource limit",
+        default="2000m",
+        required=False
+    )
+    parser.add_argument(
+        '--memory',
+        help="Memory resource limit",
+        default="4Gi",
+        required=False
     )
 
     args = parser.parse_args()
     deployment_id = args.id
+    namespace = args.namespace
     compute_id = args.compute_id
     image = args.image
-    namespace = args.namespace
+    cpu = args.cpu
+    memory = args.memory
 
     create_namespace(namespace)
 
@@ -38,6 +52,8 @@ def main():
         "ID": deployment_id,
         "COMPUTE_ID": compute_id,
         "IMAGE": image,
+        "CPU_LIMIT": cpu,
+        "MEMORY_LIMIT": memory,
     })
 
 

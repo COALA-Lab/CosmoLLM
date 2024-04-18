@@ -25,6 +25,10 @@ spec:
                 name: cosmollm-global-config-{{ID}}
             - secretRef:
                 name: cosmollm-secrets-{{ID}}
+          resources:
+            limits:
+              cpu: "{{CPU_LIMIT}}"
+              memory: "{{MEMORY_LIMIT}}"
 
       dnsPolicy: ClusterFirst
       restartPolicy: Always

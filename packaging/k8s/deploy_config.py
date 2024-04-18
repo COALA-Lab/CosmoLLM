@@ -17,12 +17,6 @@ def main():
         required=True
     )
     parser.add_argument(
-        '--mpi-hosts',
-        help="MPI hosts (comma separated string)",
-        required=False,
-        default=""
-    )
-    parser.add_argument(
         '--mpi-host-slots',
         help="Number of slots per MPI host",
         required=False,
@@ -42,8 +36,7 @@ def main():
     args = parser.parse_args()
     deployment_id = args.id
     namespace = args.namespace
-    mpi_hosts = args.mpi_hosts
-    mpi_host_slots = args.mpi_host_slots
+    mpi_host_slots = str(args.mpi_host_slots)
     ssh_public_key_path = args.ssh_public_key_path
     ssh_private_key_path = args.ssh_private_key_path
 
@@ -61,7 +54,6 @@ def main():
 
     render_and_apply("manifests/config", namespace, {
         "ID": deployment_id,
-        "MPI_HOSTS": mpi_hosts,
         "MPI_HOST_SLOTS": mpi_host_slots,
         "SSH_PUBLIC_KEY": ssh_public_key,
         "SSH_PRIVATE_KEY": ssh_private_key

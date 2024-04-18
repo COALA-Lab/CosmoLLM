@@ -3,7 +3,4 @@ kind: ConfigMap
 metadata:
   name: cosmollm-global-config-{{ID}}
 data:
-  - name: MPI_HOSTS
-    value: {{MPI_HOSTS}}
-  - name: MPI_HOST_SLOTS
-    value: {{MPI_HOST_SLOTS}}
+  MPI_HOST_SLOTS: "{{MPI_HOST_SLOTS}}"

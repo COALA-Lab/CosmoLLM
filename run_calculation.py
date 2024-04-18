@@ -53,7 +53,7 @@ def execute(
         for key, value in extra_env_vars.items():
             mpi_arguments += f"-x {key}={value} "
 
-        mpi_arguments += "--use-hwthread-cpus -nolocal --map-by slot"
+        mpi_arguments += "--use-hwthread-cpus -nolocal --map-by slot "
 
     mpi_arguments += f"-n {workers} "
     mpi_command = f"mpiexec " + mpi_arguments

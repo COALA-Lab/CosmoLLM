@@ -22,7 +22,9 @@ spec:
               protocol: TCP
           env:
             - name: OPENAI_API_KEY
-              value: {{TOKEN}}
+              value: "{{TOKEN}}"
+            - name: MPI_HOSTS
+              value: "{{MPI_HOSTS}}"
           envFrom:
             - configMapRef:
                 name: cosmollm-global-config-{{ID}}
