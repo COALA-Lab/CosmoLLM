@@ -21,8 +21,10 @@ spec:
             - containerPort: 8000
               protocol: TCP
           envFrom:
+            - configMapRef:
+                name: cosmollm-global-config-{{ID}}
             - secretRef:
-                name: cosmollm-{{ID}}
+                name: cosmollm-secrets-{{ID}}
 
       dnsPolicy: ClusterFirst
       restartPolicy: Always

@@ -35,20 +35,28 @@ def execute(
     }
     subprocess_env.update(extra_env_vars)
 
-    mpi_command = f"mpiexec -n {workers} "
+    mpi_arguments = ""
+    hostfile = None
     if settings.MPI_HOSTS:
-        hostfile = None
+        workers = len(settings.MPI_HOSTS) * settings.MPI_HOST_SLOTS
+
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             hostfile = temp_file.name
 
             for host in settings.MPI_HOSTS:
-                temp_file.write(f"{host}\n".encode())
+                temp_file.write(f"{host} slots={settings.MPI_HOST_SLOTS}\n".encode())
+        if not hostfile:
+            raise RuntimeError("Failed to create hostfile!")
 
-        mpi_command += f"--hostfile {hostfile} "
+        mpi_arguments += f"--hostfile {hostfile} "
 
         for key, value in extra_env_vars.items():
-            mpi_command += f"-x {key}={value} "
+            mpi_arguments += f"-x {key}={value} "
 
+        mpi_arguments += "--use-hwthread-cpus -nolocal --map-by slot"
+
+    mpi_arguments += f"-n {workers} "
+    mpi_command = f"mpiexec " + mpi_arguments
     cosmollm_command = (
         f"python3 executable_scripts/run_experiment.py {config_path} "
         f"--results-path {results_path} --experiment-id {experiment_id} "
@@ -58,6 +66,10 @@ def execute(
 
     command = mpi_command + cosmollm_command
     result = subprocess.run(command, shell=True, env=subprocess_env, cwd=os.getcwd())
+
+    if hostfile:
+        os.remove(hostfile)
+
     if result.returncode != 0:
         raise RuntimeError("Experiment failed!")
 

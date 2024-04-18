@@ -23,11 +23,11 @@ spec:
           env:
             - name: OPENAI_API_KEY
               value: {{TOKEN}}
-            - name: MPI_HOSTS
-              value: {{MPI_HOSTS}}
           envFrom:
+            - configMapRef:
+                name: cosmollm-global-config-{{ID}}
             - secretRef:
-                name: cosmollm-{{ID}}
+                name: cosmollm-secrets-{{ID}}
 
       dnsPolicy: ClusterFirst
       restartPolicy: Always
