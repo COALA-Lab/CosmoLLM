@@ -11,7 +11,7 @@ if [ -n "$SSH_PUBLIC_KEY" ]; then
     chmod 600 "$HOME_DIR/.ssh/id_rsa.pub"
 
     echo "Changing ownerships..."
-    sudo chown -R cosmollm:cosmollm "$HOME_DIR"
+    sudo chown -R cosmollm:cosmollm "$HOME_DIR/.ssh"
     echo "Done"
 fi
 
@@ -24,7 +24,7 @@ if [ -n "$SSH_PRIVATE_KEY" ]; then
     chmod 600 "$HOME_DIR/.ssh/id_rsa"
 
     echo "Changing ownerships..."
-    sudo chown -R cosmollm:cosmollm "$HOME_DIR"
+    sudo chown -R cosmollm:cosmollm "$HOME_DIR/.ssh"
     echo "Done"
 fi
 
@@ -43,7 +43,7 @@ if [ -n "$MPI_HOSTS" ]; then
     done
 
     echo "Changing ownerships..."
-    sudo chown -R cosmollm:cosmollm "$HOME_DIR"
+    sudo chown -R cosmollm:cosmollm "$HOME_DIR/.ssh"
     echo "Done"
 fi
 

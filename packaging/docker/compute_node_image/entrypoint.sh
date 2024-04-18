@@ -11,7 +11,7 @@ if [ -n "$SSH_PUBLIC_KEY" ]; then
     chmod 600 "$HOME_DIR/.ssh/authorized_keys"
 
     echo "Changing ownerships..."
-    chown -R cosmollm:cosmollm "$HOME_DIR"
+    chown -R cosmollm:cosmollm "$HOME_DIR/.ssh"
     echo "Done"
 fi
 
