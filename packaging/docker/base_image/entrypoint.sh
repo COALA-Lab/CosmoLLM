@@ -39,7 +39,9 @@ if [ -n "$MPI_HOSTS" ]; then
     echo "Setting up MPI hosts"
     for HOST in "${ADDR[@]}"; do
         echo "Processing $HOST..."
-        ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+        while ! ssh-keyscan -H $HOST >> ~/.ssh/known_hosts; do
+            echo "Host unresponsive! Retrying..."
+        done
     done
 
     echo "Changing ownerships..."
