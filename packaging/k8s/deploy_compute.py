@@ -8,10 +8,10 @@ def execute(
         namespace: str,
         compute_id: str,
         image: str,
-        cpu_limit: str,
-        memory_limit: str,
+        cpu_limit: str = "2000m",
+        memory_limit: str = "4Gi",
         cpu_request: str = None,
-        memory_request: str = None
+        memory_request: str = None,
 ) -> None:
     if not cpu_request:
         cpu_request = cpu_limit
@@ -56,25 +56,21 @@ if __name__ == '__main__':
     parser.add_argument(
         '--cpu-limit',
         help="CPU resource limit",
-        default="2000m",
         required=False
     )
     parser.add_argument(
         '--memory-limit',
         help="Memory resource limit",
-        default="4Gi",
         required=False
     )
     parser.add_argument(
         '--cpu-request',
         help="CPU resource request",
-        default=None,
         required=False
     )
     parser.add_argument(
         '--memory-request',
         help="Memory resource request",
-        default=None,
         required=False
     )
 
@@ -88,13 +84,20 @@ if __name__ == '__main__':
     cpu_request = args.cpu_request
     memory_request = args.memory_request
 
+    optional_kwargs = {}
+    if cpu_limit:
+        optional_kwargs["cpu_limit"] = cpu_limit
+    if memory_limit:
+        optional_kwargs["memory_limit"] = memory_limit
+    if cpu_request:
+        optional_kwargs["cpu_request"] = cpu_request
+    if memory_request:
+        optional_kwargs["memory_request"] = memory_request
+
     execute(
         deployment_id=deployment_id,
         namespace=namespace,
         compute_id=compute_id,
         image=image,
-        cpu_limit=cpu_limit,
-        memory_limit=memory_limit,
-        cpu_request=cpu_request,
-        memory_request=memory_request,
+        **optional_kwargs,
     )

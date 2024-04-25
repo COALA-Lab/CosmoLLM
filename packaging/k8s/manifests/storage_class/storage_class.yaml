@@ -1,0 +1,7 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{NAME}}
+provisioner: {{PROVISIONER}}
+reclaimPolicy: {{RECLAIM_POLICY}}
+volumeBindingMode: {{VOLUME_BINDING_MODE}}

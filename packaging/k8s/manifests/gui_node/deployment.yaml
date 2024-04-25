@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: cosmollm-gui-{{ID}}
+    deploymentId: {{ID}}
   name: cosmollm-gui-{{ID}}
 spec:
   selector:
@@ -13,10 +14,18 @@ spec:
       labels:
         app: cosmollm-gui-{{ID}}
     spec:
+      initContainers:
+        - name: init-app-data
+          image: {{IMAGE}}
+          imagePullPolicy: Always
+          command: [ 'sh', '-c', 'if [ -z "$(ls -A /shared-app)" ]; then cp -a /app/. /shared-app/; fi' ]
+          volumeMounts:
+            - name: experiment-volume
+              mountPath: /shared-app
       containers:
-        - image: {{IMAGE}}
-          imagePullPolicy: IfNotPresent
-          name: cosmollm-gui
+        - name: cosmollm-gui
+          image: {{IMAGE}}
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
               protocol: TCP
@@ -30,6 +39,13 @@ spec:
                 name: cosmollm-global-config-{{ID}}
             - secretRef:
                 name: cosmollm-secrets-{{ID}}
+          volumeMounts:
+            - mountPath: /app
+              name: experiment-volume
+      volumes:
+        - name: experiment-volume
+          persistentVolumeClaim:
+            claimName: cosmollm-experiment-volume-{{ID}}
 
       dnsPolicy: ClusterFirst
       restartPolicy: Always

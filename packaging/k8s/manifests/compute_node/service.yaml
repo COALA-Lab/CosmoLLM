@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
+  labels:
+    deploymentId: {{ID}}
   name: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
 spec:
   ports:

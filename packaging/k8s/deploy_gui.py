@@ -9,7 +9,7 @@ def execute(
         image: str,
         domain: str,
         token: str,
-        mpi_hosts: str
+        mpi_hosts: str = "",
 ) -> None:
     create_namespace(namespace)
 
@@ -27,33 +27,32 @@ if __name__ == '__main__':
     parser.add_argument(
         '--id',
         help="ID of the deployment",
-        required=True
+        required=True,
     )
     parser.add_argument(
         '-n', '--namespace',
         help="Namespace to deploy to",
-        required=True
+        required=True,
     )
     parser.add_argument(
         '-i', '--image',
         help="Docker image to deploy",
-        required=True
+        required=True,
     )
     parser.add_argument(
         '-d', '--domain',
         help="Domain of the deployment",
-        required=True
+        required=True,
     )
     parser.add_argument(
         '-t', '--token',
         help="OpenAI token",
-        required=True
+        required=True,
     )
     parser.add_argument(
         '--mpi-hosts',
         help="MPI hosts (comma separated string)",
         required=False,
-        default=""
     )
 
     args = parser.parse_args()
@@ -64,11 +63,15 @@ if __name__ == '__main__':
     token = args.token
     mpi_hosts = args.mpi_hosts
 
+    optional_kwargs = {}
+    if mpi_hosts:
+        optional_kwargs["mpi_hosts"] = mpi_hosts
+
     execute(
         deployment_id=deployment_id,
         namespace=namespace,
         image=image,
         domain=domain,
         token=token,
-        mpi_hosts=mpi_hosts,
+        **optional_kwargs,
     )

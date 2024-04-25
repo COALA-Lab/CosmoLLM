@@ -1,11 +1,15 @@
 import os
+from typing import Optional
 
 
 def create_namespace(namespace: str) -> None:
     os.system(f'kubectl create namespace {namespace}')
 
 
-def render_and_apply(template_path: str, namespace: str, context: dict) -> None:
+def render(template_path: str, context: Optional[dict] = None) -> None:
+    if not context:
+        context = {}
+
     for manifest in os.listdir(template_path):
         with open(f'{template_path}/{manifest}') as f:
             manifest_data = f.read()
@@ -16,5 +20,23 @@ def render_and_apply(template_path: str, namespace: str, context: dict) -> None:
         os.system(f"mkdir -p dist/{template_path}")
         with open(f'dist/{template_path}/{manifest}', 'w') as f:
             f.write(manifest_data)
+
+
+def render_and_apply(template_path: str, namespace: Optional[str] = None, context: Optional[dict] = None) -> None:
+    render(template_path, context)
+
+    if namespace:
+        create_namespace(namespace)
+
+    for manifest in os.listdir(f'dist/{template_path}'):
         print(f'Applying {template_path}/{manifest}...')
         os.system(f'kubectl apply -f dist/{template_path}/{manifest} -n {namespace}')
+
+
+def delete_by_labels(namespace: str, labels: dict) -> None:
+    labels = ",".join([f"{key}={value}" for key, value in labels.items()])
+    os.system(f'kubectl delete all -l {labels} -n {namespace}')
+    os.system(f'kubectl delete pvc -l {labels} -n {namespace}')
+    os.system(f'kubectl delete configmap -l {labels} -n {namespace}')
+    os.system(f'kubectl delete secret -l {labels} -n {namespace}')
+    os.system(f'kubectl delete ingress -l {labels} -n {namespace}')
