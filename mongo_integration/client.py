@@ -37,6 +37,16 @@ class Mongo:
 
         return client[db_name]
 
+    def __getitem__(self, item):
+        db = self._get_db()
+
+        return getattr(db, item)
+
+    def __setitem__(self, key, value):
+        db = self._get_db()
+
+        setattr(db, key, value)
+
     def __getattr__(self, item):
         db = self._get_db()
 
