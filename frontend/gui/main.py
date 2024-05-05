@@ -5,6 +5,7 @@ import streamlit as st
 
 from agents.chat_agent import ChatAgent
 from consts import CHAT_INTRO_TEXT, ContentType
+from frontend.utils.auth import Auth
 
 
 def display_past_conversation() -> None:
@@ -80,6 +81,13 @@ def clear_conversation() -> None:
 
 
 def main():
+    st.sidebar.title("Actions")
+
+    auth = Auth()
+
+    if not auth.login():
+        return
+
     if "messages" not in st.session_state:
         st.session_state.messages = []
 

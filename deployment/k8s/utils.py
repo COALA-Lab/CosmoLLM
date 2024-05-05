@@ -15,6 +15,8 @@ def render(template_path: str, context: Optional[dict] = None) -> None:
             manifest_data = f.read()
 
             for key, value in context.items():
+                if value is None:
+                    value = ""
                 manifest_data = manifest_data.replace("{{" + f"{key}" + "}}", value)
 
         os.system(f"mkdir -p dist/{template_path}")

@@ -5,7 +5,7 @@ from enum import Enum
 from pprint import pprint
 
 from agents.chat_agent import ChatAgent
-from frontend.consts import CHAT_INTRO_TEXT
+from frontend.gui.consts import CHAT_INTRO_TEXT
 
 root_dir = os.path.dirname(__file__)
 
@@ -40,15 +40,25 @@ def main_gui() -> None:
     subprocess_env = os.environ.copy()
     subprocess_env["PYTHONPATH"] = root_dir
 
-    command = f"streamlit run --server.headless true --server.port 8000 {root_dir}/frontend/main.py"
+    command = f"streamlit run --server.headless true --server.port 8000 {root_dir}/frontend/gui/main.py"
     subprocess.run(command, shell=True, env=subprocess_env, cwd=root_dir)
 
 
-def execute(console_mode: bool = False, gui_mode: bool = False) -> None:
+def main_admin() -> None:
+    subprocess_env = os.environ.copy()
+    subprocess_env["PYTHONPATH"] = root_dir
+
+    command = f"streamlit run --server.headless true --server.port 8000 {root_dir}/frontend/admin/main.py"
+    subprocess.run(command, shell=True, env=subprocess_env, cwd=root_dir)
+
+
+def execute(console_mode: bool = False, gui_mode: bool = False, admin_mode: bool = False) -> None:
     if console_mode:
         main_console()
     elif gui_mode:
         main_gui()
+    elif admin_mode:
+        main_admin()
     else:
         print("No display mode selected. Defaulting to GUI mode...")
         main_gui()
@@ -67,7 +77,12 @@ if __name__ == "__main__":
         action='store_true', default=False
     )
     parser.add_argument(
-        '-a', '--action',
+        '-a', '--admin',
+        help="Run the admin gui.",
+        action='store_true', default=False
+    )
+    parser.add_argument(
+        '--action',
         help="Select the action to perform.",
         default=Actions.RUN.value,
         choices=[action.value for action in Actions]
@@ -87,11 +102,11 @@ if __name__ == "__main__":
             exit(1)
 
     elif args.action.upper() == Actions.RUN.value:
-        if args.console and args.gui:
-            raise ValueError("You cannot run the bot in both console and GUI mode "
-                             "at the same time (rerun with --help)!")
+        chosen_option_count = sum([args.console, args.gui, args.admin])
+        if chosen_option_count > 1:
+            raise ValueError("Cannot run in multiple modes at the same time (rerun with --help)!")
         try:
-            execute(console_mode=args.console, gui_mode=args.gui)
+            execute(console_mode=args.console, gui_mode=args.gui, admin_mode=args.admin)
         except KeyboardInterrupt:
             pass
     else:

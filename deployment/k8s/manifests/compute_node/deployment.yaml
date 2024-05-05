@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: cosmollm-gui-{{ID}}
+    app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
     deploymentId: {{ID}}
-  name: cosmollm-gui-{{ID}}
+  name: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
 spec:
   selector:
     matchLabels:
-      app: cosmollm-gui-{{ID}}
+      app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
   template:
     metadata:
       labels:
-        app: cosmollm-gui-{{ID}}
+        app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
     spec:
       initContainers:
         - name: init-app-data
@@ -23,17 +23,15 @@ spec:
             - name: experiment-volume
               mountPath: /shared-app
       containers:
-        - name: cosmollm-gui
+        - name: cosmollm-compute
           image: {{IMAGE}}
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
               protocol: TCP
           env:
-            - name: OPENAI_API_KEY
-              value: "{{TOKEN}}"
-            - name: MPI_HOSTS
-              value: "{{MPI_HOSTS}}"
+            - name: DEPLOYMENT_TYPE
+              value: "compute"
           envFrom:
             - configMapRef:
                 name: cosmollm-global-config-{{ID}}
@@ -42,6 +40,13 @@ spec:
           volumeMounts:
             - mountPath: /app
               name: experiment-volume
+          resources:
+            limits:
+              cpu: "{{CPU_LIMIT}}"
+              memory: "{{MEMORY_LIMIT}}"
+            requests:
+              cpu: "{{CPU_REQUEST}}"
+              memory: "{{MEMORY_REQUEST}}"
       volumes:
         - name: experiment-volume
           persistentVolumeClaim:

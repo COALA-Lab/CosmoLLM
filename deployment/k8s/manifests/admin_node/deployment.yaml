@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cosmollm-admin
+  name: cosmollm-admin
+spec:
+  selector:
+    matchLabels:
+      app: cosmollm-admin
+  template:
+    metadata:
+      labels:
+        app: cosmollm-admin
+    spec:
+      containers:
+        - name: cosmollm-admin
+          image: {{IMAGE}}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: DEPLOYMENT_TYPE
+              value: "admin"
+            - name: DEPLOYMENT_ID
+              value: "admin"
+            - name: MONGO_URL
+              value: {{MONGO_URL}}
+          envFrom:
+            - secretRef:
+                name: cosmollm-admin-secrets
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always

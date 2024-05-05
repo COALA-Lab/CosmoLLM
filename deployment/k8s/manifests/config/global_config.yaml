@@ -5,4 +5,6 @@ metadata:
     deploymentId: {{ID}}
   name: cosmollm-global-config-{{ID}}
 data:
+  DEPLOYMENT_ID: "{{ID}}"
+  MONGO_URL: "{{MONGO_URL}}"
   MPI_HOST_SLOTS: "{{MPI_HOST_SLOTS}}"
