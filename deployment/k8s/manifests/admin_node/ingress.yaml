@@ -4,6 +4,8 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels:
+    app: cosmollm-admin
   name: cosmollm-admin
 spec:
   rules:

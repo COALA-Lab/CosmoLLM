@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
+    app: cosmollm-compute-{{ID}}
     deploymentId: {{ID}}
   name: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
 spec:
   selector:
     matchLabels:
-      app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
+      app: cosmollm-compute-{{ID}}
   template:
     metadata:
       labels:
-        app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
+        app: cosmollm-compute-{{ID}}
     spec:
       initContainers:
         - name: init-app-data

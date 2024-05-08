@@ -5,6 +5,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
   labels:
+    app: cosmollm-gui-{{ID}}
     deploymentId: {{ID}}
   name: cosmollm-gui-{{ID}}
 spec:

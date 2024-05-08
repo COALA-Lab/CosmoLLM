@@ -1,3 +1,8 @@
+if __name__ == '__main__':
+    from utils import adjust_pythonpath
+
+    adjust_pythonpath()
+
 import os
 from argparse import ArgumentParser
 

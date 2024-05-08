@@ -1,6 +1,11 @@
+if __name__ == '__main__':
+    from utils import adjust_pythonpath
+
+    adjust_pythonpath()
+
 from argparse import ArgumentParser
 
-from utils import render_and_apply
+from deployment.k8s.utils import render_and_apply
 
 
 def execute(

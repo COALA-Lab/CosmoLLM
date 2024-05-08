@@ -3,16 +3,19 @@ if __name__ == '__main__':
 
     adjust_pythonpath()
 
+import os
 from argparse import ArgumentParser
-
-from deployment.k8s.utils import delete_by_labels
 
 
 def execute(
-        deployment_id: str,
-        namespace: str,
+    deployment_id: str,
+    namespace: str,
 ) -> None:
-    delete_by_labels(namespace, {"deploymentId": deployment_id})
+    command = (
+        f"kubectl rollout restart deployment cosmollm-gui-{deployment_id} -n {namespace}"
+    )
+
+    os.system(command)
 
 
 if __name__ == '__main__':
@@ -24,7 +27,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-n', '--namespace',
-        help="Namespace containing the deployment",
+        help="Namespace of the deployment",
         required=True,
     )
 

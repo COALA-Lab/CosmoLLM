@@ -34,3 +34,5 @@ mypy==1.6.1
 streamlit==1.29.0
 streamlit-authenticator==0.3.2
 pymongo==4.7.1
+cryptography==42.0.7
+pyopenssl==24.1.0

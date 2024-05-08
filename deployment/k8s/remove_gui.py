@@ -5,14 +5,14 @@ if __name__ == '__main__':
 
 from argparse import ArgumentParser
 
-from deployment.k8s.utils import delete_by_labels
+from deployment.k8s.utils import delete_by_name
 
 
 def execute(
         deployment_id: str,
         namespace: str,
 ) -> None:
-    delete_by_labels(namespace, {"deploymentId": deployment_id})
+    delete_by_name(namespace, f"cosmollm-gui-{deployment_id}")
 
 
 if __name__ == '__main__':

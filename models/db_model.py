@@ -1,4 +1,6 @@
 from abc import ABC
+from enum import Enum
+from typing import Callable, List, Optional
 
 from pydantic import BaseModel
 from pymongo.results import UpdateResult, DeleteResult
@@ -7,7 +9,22 @@ from pymongo.collection import Collection
 from mongo_integration.client import Mongo
 
 
+class ChangeType(str, Enum):
+    CREATE = "Create"
+    UPDATE = "Update"
+    DELETE = "Delete"
+
+
+class Subscriber(BaseModel):
+    collection_name: str
+    primary_key: str
+    primary_value: str
+    receiver_name: str = "on_event"
+
+
 class DBModel(BaseModel, ABC):
+    _subscribers: List[Subscriber] = []
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -29,7 +46,9 @@ class DBModel(BaseModel, ABC):
         if result.matched_count == 0 and result.upserted_id is not None:
             created = True
         elif result.modified_count == 0:
-            raise Exception("Failed to save model!")
+            raise Exception("Model not changed!")
+
+        self.notify(ChangeType.CREATE if created else ChangeType.UPDATE)
 
         return created
 
@@ -43,10 +62,12 @@ class DBModel(BaseModel, ABC):
         if result.deleted_count == 0:
             raise Exception("Failed to delete model!")
 
+        self.notify(ChangeType.DELETE)
+
         return True
 
     @classmethod
-    def get(cls, **filter) -> BaseModel:
+    def get(cls, **filter) -> 'DBModel':
         results = list(cls.filter(**filter))
 
         if len(results) == 0:
@@ -57,7 +78,7 @@ class DBModel(BaseModel, ABC):
         return results[0]
 
     @classmethod
-    def filter(cls, **filter) -> list[BaseModel]:
+    def filter(cls, **filter) -> list['DBModel']:
         collection = cls._get_collection()
 
         demangled_filter = {}
@@ -77,9 +98,42 @@ class DBModel(BaseModel, ABC):
 
         raise Exception("Primary key not found!")
 
+    def get_primary_value(self) -> str:
+        return getattr(self, self.get_primary_key())
+
     @classmethod
     def get_collection_name(cls) -> str:
         return cls.__name__.lower()
+
+    def subscribe(self, subject: 'DBModel', receiver_name: Optional[str] = None) -> None:
+        if receiver_name is None:
+            receiver_name = "on_event"
+
+        subscriber = Subscriber(
+            id=subject.get_collection_name() + subject.get_primary_value(),
+            collection_name=subject.get_collection_name(),
+            primary_key=subject.get_primary_key(),
+            primary_value=subject.get_primary_value(),
+            receiver_name=receiver_name
+        )
+        self._subscribers.append(subscriber)
+
+    def unsubscribe(self, subject: 'DBModel') -> None:
+        self._subscribers = [
+            subscriber for subscriber in self._subscribers
+            if subscriber.id != subject.get_collection_name() + subject.get_primary_value()
+        ]
+
+    def notify(self, change_type: ChangeType) -> None:
+        for subscriber in self._subscribers:
+            try:
+                model = Mongo()[subscriber.collection_name].find_one({subscriber.primary_key: subscriber.primary_value})
+                getattr(model, subscriber.receiver_name)(self, change_type)
+            except Exception as e:
+                raise Exception(
+                    f"Failed to notify subscriber "
+                    f"{subscriber.collection_name}:{subscriber.primary_value} with error {e}"
+                )
 
     @classmethod
     def _get_collection(cls) -> Collection:

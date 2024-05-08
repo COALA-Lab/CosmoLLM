@@ -1,14 +1,19 @@
+if __name__ == '__main__':
+    from utils import adjust_pythonpath
+
+    adjust_pythonpath()
+
 import base64
 from argparse import ArgumentParser
 
-from utils import create_namespace, render_and_apply
+from deployment.k8s.utils import create_namespace, render_and_apply
 
 
 def execute(
         namespace: str,
         image: str,
         domain: str,
-        kube_config_path: str,
+        kube_config: str,
         mongo_url: str,
         mongo_user: str = None,
         mongo_password: str = None,
@@ -17,11 +22,7 @@ def execute(
 ) -> None:
     create_namespace(namespace)
 
-    kube_config = ""
-    if kube_config_path:
-        with open(kube_config_path) as f:
-            kube_config = f.read()
-            kube_config = base64.b64encode(kube_config.encode()).decode()
+    kube_config = base64.b64encode(kube_config.encode()).decode()
 
     render_and_apply("manifests/admin_node", namespace, {
         "IMAGE": image,
@@ -94,6 +95,8 @@ if __name__ == '__main__':
     admin_user = args.admin_user
     admin_password = args.admin_password
 
+    with open(kube_config_path) as f:
+        kube_config = f.read()
 
     optional_kwargs = {}
     if mongo_user or mongo_password:
@@ -107,7 +110,7 @@ if __name__ == '__main__':
         namespace=namespace,
         image=image,
         domain=domain,
-        kube_config_path=kube_config_path,
+        kube_config=kube_config,
         mongo_url=mongo_url,
         **optional_kwargs,
     )

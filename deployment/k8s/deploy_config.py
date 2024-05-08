@@ -1,31 +1,31 @@
+if __name__ == '__main__':
+    from utils import adjust_pythonpath
+
+    adjust_pythonpath()
+
 import base64
 from argparse import ArgumentParser
+from typing import Optional
 
-from utils import create_namespace, render_and_apply
+from deployment.k8s.utils import create_namespace, render_and_apply
 
 
 def execute(
         deployment_id: str,
         namespace: str,
         mongo_url: str,
-        mongo_user: str = None,
-        mongo_password: str = None,
+        mongo_user: Optional[str] = None,
+        mongo_password: Optional[str] = None,
         admin_user: str = "admin",
         admin_password: str = "admin",
         mpi_host_slots: int = 2,
-        ssh_public_key_path: str = None,
-        ssh_private_key_path: str = None,
+        ssh_public_key: Optional[str] = None,
+        ssh_private_key: Optional[str] = None,
 ) -> None:
 
-    ssh_public_key = ""
-    ssh_private_key = ""
-    if ssh_public_key_path and ssh_private_key_path:
-        with open(ssh_public_key_path) as f:
-            ssh_public_key = f.read()
-            ssh_public_key = base64.b64encode(ssh_public_key.encode()).decode()
-        with open(ssh_private_key_path) as f:
-            ssh_private_key = f.read()
-            ssh_private_key = base64.b64encode(ssh_private_key.encode()).decode()
+    if ssh_public_key and ssh_private_key:
+        ssh_public_key = base64.b64encode(ssh_public_key.encode()).decode()
+        ssh_private_key = base64.b64encode(ssh_private_key.encode()).decode()
 
     create_namespace(namespace)
 
@@ -107,6 +107,12 @@ if __name__ == '__main__':
     ssh_public_key_path = args.ssh_public_key_path
     ssh_private_key_path = args.ssh_private_key_path
 
+    with open(ssh_public_key_path) as f:
+        ssh_public_key = f.read()
+
+    with open(ssh_private_key_path) as f:
+        ssh_private_key = f.read()
+
     optional_kwargs = {}
     if mongo_user or mongo_password:
         optional_kwargs["mongo_user"] = mongo_user
@@ -117,9 +123,9 @@ if __name__ == '__main__':
     if mpi_host_slots:
         optional_kwargs["mpi_host_slots"] = mpi_host_slots
     if ssh_public_key_path:
-        optional_kwargs["ssh_public_key_path"] = ssh_public_key_path
+        optional_kwargs["ssh_public_key"] = ssh_public_key
     if ssh_private_key_path:
-        optional_kwargs["ssh_private_key_path"] = ssh_private_key_path
+        optional_kwargs["ssh_private_key"] = ssh_private_key
 
     execute(
         deployment_id=deployment_id,

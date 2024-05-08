@@ -1,6 +1,12 @@
-from argparse import ArgumentParser
+if __name__ == '__main__':
+    from utils import adjust_pythonpath
 
-from utils import create_namespace, render_and_apply
+    adjust_pythonpath()
+
+from argparse import ArgumentParser
+from typing import Optional
+
+from deployment.k8s.utils import create_namespace, render_and_apply
 
 
 def execute(
@@ -10,8 +16,8 @@ def execute(
         image: str,
         cpu_limit: str = "2000m",
         memory_limit: str = "4Gi",
-        cpu_request: str = None,
-        memory_request: str = None,
+        cpu_request: Optional[str] = None,
+        memory_request: Optional[str] = None,
 ) -> None:
     if not cpu_request:
         cpu_request = cpu_limit

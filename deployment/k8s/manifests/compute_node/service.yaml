@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+    app: cosmollm-compute-{{ID}}
     deploymentId: {{ID}}
   name: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
 spec:

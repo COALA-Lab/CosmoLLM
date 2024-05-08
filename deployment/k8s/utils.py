@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+import sys
 
 
 def create_namespace(namespace: str) -> None:
@@ -7,6 +8,9 @@ def create_namespace(namespace: str) -> None:
 
 
 def render(template_path: str, context: Optional[dict] = None) -> None:
+    cwd = os.getcwd()
+    os.chdir(os.path.dirname(__file__))
+
     if not context:
         context = {}
 
@@ -23,8 +27,13 @@ def render(template_path: str, context: Optional[dict] = None) -> None:
         with open(f'dist/{template_path}/{manifest}', 'w') as f:
             f.write(manifest_data)
 
+    os.chdir(cwd)
+
 
 def render_and_apply(template_path: str, namespace: Optional[str] = None, context: Optional[dict] = None) -> None:
+    cwd = os.getcwd()
+    os.chdir(os.path.dirname(__file__))
+
     render(template_path, context)
 
     if namespace:
@@ -34,6 +43,8 @@ def render_and_apply(template_path: str, namespace: Optional[str] = None, contex
         print(f'Applying {template_path}/{manifest}...')
         os.system(f'kubectl apply -f dist/{template_path}/{manifest} -n {namespace}')
 
+    os.chdir(cwd)
+
 
 def delete_by_labels(namespace: str, labels: dict) -> None:
     labels = ",".join([f"{key}={value}" for key, value in labels.items()])
@@ -42,3 +53,17 @@ def delete_by_labels(namespace: str, labels: dict) -> None:
     os.system(f'kubectl delete configmap -l {labels} -n {namespace}')
     os.system(f'kubectl delete secret -l {labels} -n {namespace}')
     os.system(f'kubectl delete ingress -l {labels} -n {namespace}')
+
+
+def delete_by_name(namespace: str, name: str) -> None:
+    os.system(f'kubectl delete all {name} -n {namespace}')
+    os.system(f'kubectl delete pvc {name} -n {namespace}')
+    os.system(f'kubectl delete configmap {name} -n {namespace}')
+    os.system(f'kubectl delete secret {name} -n {namespace}')
+    os.system(f'kubectl delete ingress {name} -n {namespace}')
+
+
+def adjust_pythonpath() -> None:
+    # Two dirs up
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
+    sys.path.append(root_dir)

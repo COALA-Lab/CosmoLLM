@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: cosmollm-gui-{{ID}}
   labels:
+    app: cosmollm-gui-{{ID}}
     deploymentId: {{ID}}
 spec:
   ports:
