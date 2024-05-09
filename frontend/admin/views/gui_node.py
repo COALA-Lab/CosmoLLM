@@ -32,6 +32,12 @@ class GUINode(View):
     mongoPassword: Optional[str] = None
 
     def save(self) -> bool:
+        if not self._validate_id(self.id):
+            raise Exception(
+                "Deployment id must use only lowercase letters, numbers and dashes (-)! "
+                "It also must start with a letter!"
+            )
+
         try:
             old_state = self.get(id=self.id)
         except Exception:
@@ -62,6 +68,20 @@ class GUINode(View):
     def _delete_deployment(self):
         deployment = Deployment.get(id=self.id)
         deployment.delete()
+
+    @staticmethod
+    def _validate_id(self, id: str) -> bool:
+        for i, c in enumerate(id):
+            if i == 0 and not c.isalpha():
+                return False
+
+            if c.isalnum() and not c.islower():
+                return False
+
+            if not c.isalnum() and c != "-":
+                return False
+
+        return True
 
 
 class Deployment(DBModel):
@@ -169,7 +189,7 @@ class Deployment(DBModel):
             deploy_compute(
                 deployment_id=self.id,
                 namespace=self.gui_node.namespace,
-                compute_id=f"{self.id}-{compute_id}",
+                compute_id=compute_id,
                 image=compute_node_template.image,
                 cpu_limit=compute_node_template.cpuLimit,
                 memory_limit=compute_node_template.memoryLimit,
