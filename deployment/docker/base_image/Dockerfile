@@ -16,7 +16,7 @@ ENV PATH="$PATH:/home/cosmollm/.local/bin"
 USER cosmollm
 RUN . /etc/profile
 
-RUN git clone https://github.com/COALA-Lab/CosmoLLM.git . --recursive --branch main
+RUN git clone https://github.com/COALA-Lab/CosmoLLM.git . --recursive --branch master
 
 RUN SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True pip install -r requirements.txt
 
