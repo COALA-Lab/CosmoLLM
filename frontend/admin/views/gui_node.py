@@ -53,6 +53,8 @@ class GUINode(View):
     def delete(self) -> None:
         self._delete_deployment()
 
+        super().delete()
+
     def _create_deployment(self):
         Deployment(
             id=self.id,
@@ -63,15 +65,15 @@ class GUINode(View):
         old_deployment = Deployment.get(id=self.id)
         new_deployment = old_deployment.model_copy()
         new_deployment.gui_node = self
-        new_deployment.update(old_deployment)
+        new_deployment.update(old_deployment.gui_node)
 
     def _delete_deployment(self):
         deployment = Deployment.get(id=self.id)
         deployment.delete()
 
     @staticmethod
-    def _validate_id(self, id: str) -> bool:
-        for i, c in enumerate(id):
+    def _validate_id(node_id: str) -> bool:
+        for i, c in enumerate(node_id):
             if i == 0 and not c.isalpha():
                 return False
 
@@ -109,8 +111,8 @@ class Deployment(DBModel):
 
         self.save()
 
-    def update(self, old_state: 'Deployment') -> None:
-        changed_fields = self.get_field_diff(old_state)
+    def update(self, old_node: GUINode) -> None:
+        changed_fields = self.gui_node.get_field_diff(old_node)
 
         storage_changes = {"storageSize", "storageClass",}
         if storage_changes.intersection(set(changed_fields)):
@@ -125,7 +127,7 @@ class Deployment(DBModel):
 
         if "computeNodeTemplateId" in changed_fields or "computeNodeCount" in changed_fields:
             if "computeNodeTemplateId" in changed_fields:
-                old_node_template = ComputeNodeTemplate.get(id=old_state.gui_node.computeNodeTemplateId)
+                old_node_template = ComputeNodeTemplate.get(id=old_node.computeNodeTemplateId)
                 old_node_template.unsubscribe(self)
                 old_node_template.save()
                 new_node_template = ComputeNodeTemplate.get(id=self.gui_node.computeNodeTemplateId)
@@ -183,6 +185,8 @@ class Deployment(DBModel):
                 namespace=self.gui_node.namespace,
                 compute_id=compute_id,
             )
+
+        self.deployed_compute_ids = []
 
         for i in range(self.gui_node.computeNodeCount):
             compute_id = str(i)

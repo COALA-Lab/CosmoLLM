@@ -13,6 +13,7 @@ spec:
     metadata:
       labels:
         app: cosmollm-compute-{{ID}}
+        computeInstance: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
     spec:
       initContainers:
         - name: init-app-data

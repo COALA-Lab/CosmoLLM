@@ -56,7 +56,8 @@ def delete_by_labels(namespace: str, labels: dict) -> None:
 
 
 def delete_by_name(namespace: str, name: str) -> None:
-    os.system(f'kubectl delete all {name} -n {namespace}')
+    os.system(f'kubectl delete deployment {name} -n {namespace}')
+    os.system(f'kubectl delete service {name} -n {namespace}')
     os.system(f'kubectl delete pvc {name} -n {namespace}')
     os.system(f'kubectl delete configmap {name} -n {namespace}')
     os.system(f'kubectl delete secret {name} -n {namespace}')

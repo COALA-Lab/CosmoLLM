@@ -12,5 +12,5 @@ spec:
       protocol: TCP
       targetPort: 22
   selector:
-    app: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
+    computeInstance: cosmollm-compute-{{ID}}-{{COMPUTE_ID}}
   type: ClusterIP
