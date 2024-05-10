@@ -17,7 +17,7 @@ from models.db_model import ChangeType, DBModel
 class GUINode(View):
     id: str
     namespace: str = "cosmollm"
-    image: str
+    image: str = "nikolasocec/cosmollm"
     domain: str
     apiToken: str
     computeNodeTemplateId: str
@@ -27,9 +27,9 @@ class GUINode(View):
     mpiHostSlots: int = 2
     storageClass: str = "local-storage"
     storageSize: str = "4Gi"
-    mongoUrl: str
-    mongoUser: Optional[str] = None
-    mongoPassword: Optional[str] = None
+    mongoUrl: str = "mongodb:27017"
+    mongoUser: Optional[str] = "root"
+    mongoPassword: Optional[str] = "root"
 
     def save(self) -> bool:
         if not self._validate_id(self.id):
