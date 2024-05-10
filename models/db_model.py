@@ -23,7 +23,7 @@ class Subscriber(BaseModel):
 
 
 class DBModel(BaseModel, ABC):
-    _subscribers: List[Subscriber] = []
+    subscribers: List[Subscriber] = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -36,7 +36,7 @@ class DBModel(BaseModel, ABC):
         data = self.model_dump()
 
         result: UpdateResult = collection.update_one(
-            {primary_key: data[primary_key]},
+            {primary_key: self.get_primary_value()},
             {"$set": data},
             upsert=True
         )
@@ -55,9 +55,8 @@ class DBModel(BaseModel, ABC):
     def delete(self) -> bool:
         collection = self._get_collection()
         primary_key = self.get_primary_key()
-        data = self.model_dump()
 
-        result: DeleteResult = collection.delete_one({primary_key: data[primary_key]})
+        result: DeleteResult = collection.delete_one({primary_key: self.get_primary_value()})
 
         if result.deleted_count == 0:
             raise Exception("Failed to delete model!")
@@ -116,16 +115,16 @@ class DBModel(BaseModel, ABC):
             primary_value=subject.get_primary_value(),
             receiver_name=receiver_name
         )
-        self._subscribers.append(subscriber)
+        self.subscribers.append(subscriber)
 
     def unsubscribe(self, subject: 'DBModel') -> None:
-        self._subscribers = [
-            subscriber for subscriber in self._subscribers
+        self.subscribers = [
+            subscriber for subscriber in self.subscribers
             if subscriber.id != subject.get_collection_name() + subject.get_primary_value()
         ]
 
     def notify(self, change_type: ChangeType) -> None:
-        for subscriber in self._subscribers:
+        for subscriber in self.subscribers:
             try:
                 model = Mongo()[subscriber.collection_name].find_one({subscriber.primary_key: subscriber.primary_value})
                 getattr(model, subscriber.receiver_name)(self, change_type)
