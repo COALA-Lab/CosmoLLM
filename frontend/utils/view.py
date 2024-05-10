@@ -8,6 +8,8 @@ from pydantic.fields import FieldInfo
 
 from models.db_model import DBModel
 
+VIEW_IGNORED_FIELDS = ["subscribers"]
+
 
 class FieldType(str, Enum):
     STRING = "String"
@@ -31,6 +33,8 @@ class View(DBModel, ABC):
 
         for field_name, field_info in cls.model_fields.items():
             if field_name.startswith("_"):
+                continue
+            if field_name in VIEW_IGNORED_FIELDS:
                 continue
 
             field_info: FieldInfo

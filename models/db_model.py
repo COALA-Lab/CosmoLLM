@@ -1,12 +1,15 @@
 from abc import ABC
 from enum import Enum
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 from pymongo.results import UpdateResult, DeleteResult
 from pymongo.collection import Collection
 
 from mongo_integration.client import Mongo
+
+# TODO: remove
+MODEL_REGISTRY = {}
 
 
 class ChangeType(str, Enum):
@@ -16,10 +19,14 @@ class ChangeType(str, Enum):
 
 
 class Subscriber(BaseModel):
-    collection_name: str
+    id: str
+    class_name: str
     primary_key: str
     primary_value: str
     receiver_name: str = "on_event"
+
+    def __eq__(self, other):
+        return self.id == other.id
 
 
 class DBModel(BaseModel, ABC):
@@ -29,8 +36,9 @@ class DBModel(BaseModel, ABC):
         super().__init__(*args, **kwargs)
 
         self._create_index()
+        self._populate_registry()
 
-    def save(self) -> bool:
+    def save(self, notify: bool = True) -> bool:
         collection = self._get_collection()
         primary_key = self.get_primary_key()
         data = self.model_dump()
@@ -45,10 +53,9 @@ class DBModel(BaseModel, ABC):
 
         if result.matched_count == 0 and result.upserted_id is not None:
             created = True
-        elif result.modified_count == 0:
-            raise Exception("Model not changed!")
 
-        self.notify(ChangeType.CREATE if created else ChangeType.UPDATE)
+        if notify:
+            self.notify(ChangeType.CREATE if created else ChangeType.UPDATE)
 
         return created
 
@@ -56,12 +63,12 @@ class DBModel(BaseModel, ABC):
         collection = self._get_collection()
         primary_key = self.get_primary_key()
 
+        self.notify(ChangeType.DELETE)
+
         result: DeleteResult = collection.delete_one({primary_key: self.get_primary_value()})
 
         if result.deleted_count == 0:
             raise Exception("Failed to delete model!")
-
-        self.notify(ChangeType.DELETE)
 
         return True
 
@@ -110,12 +117,14 @@ class DBModel(BaseModel, ABC):
 
         subscriber = Subscriber(
             id=subject.get_collection_name() + subject.get_primary_value(),
-            collection_name=subject.get_collection_name(),
+            class_name=subject.__class__.__name__,
             primary_key=subject.get_primary_key(),
             primary_value=subject.get_primary_value(),
             receiver_name=receiver_name
         )
-        self.subscribers.append(subscriber)
+        if subscriber not in self.subscribers:
+            self.subscribers.append(subscriber)
+            self.save(notify=False)
 
     def unsubscribe(self, subject: 'DBModel') -> None:
         self.subscribers = [
@@ -123,15 +132,17 @@ class DBModel(BaseModel, ABC):
             if subscriber.id != subject.get_collection_name() + subject.get_primary_value()
         ]
 
+        self.save(notify=False)
+
     def notify(self, change_type: ChangeType) -> None:
         for subscriber in self.subscribers:
             try:
-                model = Mongo()[subscriber.collection_name].find_one({subscriber.primary_key: subscriber.primary_value})
+                model = MODEL_REGISTRY[subscriber.class_name].get(**{subscriber.primary_key: subscriber.primary_value})
                 getattr(model, subscriber.receiver_name)(self, change_type)
             except Exception as e:
                 raise Exception(
                     f"Failed to notify subscriber "
-                    f"{subscriber.collection_name}:{subscriber.primary_value} with error {e}"
+                    f"{subscriber.class_name}:{subscriber.primary_value} with error: '{e}'"
                 )
 
     @classmethod
@@ -144,3 +155,16 @@ class DBModel(BaseModel, ABC):
         collection = cls._get_collection()
         primary_key = cls.get_primary_key()
         collection.create_index(primary_key, unique=True)
+
+    def _populate_registry(self):
+        # TODO: replace with dynamic registry
+
+        from frontend.admin.views.compute_node_template import ComputeNodeTemplate
+        from frontend.admin.views.gui_node import GUINode, Deployment
+
+        global MODEL_REGISTRY
+        MODEL_REGISTRY = {
+            GUINode.__name__: GUINode,
+            ComputeNodeTemplate.__name__: ComputeNodeTemplate,
+            Deployment.__name__: Deployment,
+        }

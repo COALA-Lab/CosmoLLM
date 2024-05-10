@@ -94,7 +94,7 @@ class Deployment(DBModel):
     def on_event(self, compute_node: ComputeNodeTemplate, change_type: ChangeType) -> None:
         if change_type == ChangeType.DELETE:
             raise Exception(
-                f"Deployment {id} depends on compute node {compute_node.id}, but you are trying to delete it!"
+                f"Deployment {self.id} depends on compute node {compute_node.id}, but you are trying to delete it!"
             )
         elif change_type == ChangeType.UPDATE:
             self._update_compute_nodes()
@@ -129,10 +129,8 @@ class Deployment(DBModel):
             if "computeNodeTemplateId" in changed_fields:
                 old_node_template = ComputeNodeTemplate.get(id=old_node.computeNodeTemplateId)
                 old_node_template.unsubscribe(self)
-                old_node_template.save()
                 new_node_template = ComputeNodeTemplate.get(id=self.gui_node.computeNodeTemplateId)
                 new_node_template.subscribe(self)
-                new_node_template.save()
 
             self._update_compute_nodes()
 

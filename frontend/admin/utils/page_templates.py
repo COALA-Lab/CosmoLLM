@@ -104,11 +104,12 @@ def delete_view_instance(
         def _delete_view():
             try:
                 view.delete()
+                st.info(view_deleted_message)
             except Exception as e:
                 st.error(f"{delete_error_message} error={e}")
-                return
-            st.info(view_deleted_message)
-            sleep(2)
+                sleep(5)
+            finally:
+                sleep(2)
 
         return _delete_view
 
