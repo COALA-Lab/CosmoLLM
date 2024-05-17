@@ -9,6 +9,7 @@ from deployment.k8s.remove_deployment import execute as remove_deployment
 from deployment.k8s.remove_gui import execute as remove_gui
 from deployment.k8s.restart_gui import execute as restart_gui
 from frontend.admin.utils.rsa import generate_ssh_keys
+from frontend.admin.utils.validation import validate_id
 from frontend.admin.views.compute_node_template import ComputeNodeTemplate
 from frontend.utils.view import View
 from models.db_model import ChangeType, DBModel
@@ -31,8 +32,8 @@ class GUINode(View):
     mongoUser: Optional[str] = "root"
     mongoPassword: Optional[str] = "root"
 
-    def save(self) -> bool:
-        if not self._validate_id(self.id):
+    def save(self, notify: bool = True) -> bool:
+        if not validate_id(self.id):
             raise Exception(
                 "Deployment id must use only lowercase letters, numbers and dashes (-)! "
                 "It also must start with a letter!"
@@ -48,7 +49,7 @@ class GUINode(View):
         else:
             self._create_deployment()
 
-        return super().save()
+        return super().save(notify)
 
     def delete(self) -> None:
         self._delete_deployment()
@@ -70,20 +71,6 @@ class GUINode(View):
     def _delete_deployment(self):
         deployment = Deployment.get(id=self.id)
         deployment.delete()
-
-    @staticmethod
-    def _validate_id(node_id: str) -> bool:
-        for i, c in enumerate(node_id):
-            if i == 0 and not c.isalpha():
-                return False
-
-            if c.isalnum() and not c.islower():
-                return False
-
-            if not c.isalnum() and c != "-":
-                return False
-
-        return True
 
 
 class Deployment(DBModel):
