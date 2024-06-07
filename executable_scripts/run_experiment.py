@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import subprocess
+import time
 from pathlib import Path
 from argparse import ArgumentParser
 import traceback
@@ -101,6 +102,8 @@ def execute(config_path: str, results_path: str, experiment_id: Optional[str] = 
 
     # Run the experiment
     with zeus.ChainManager(config.nchains) as chain_manager:
+        start_timestamp = time.time()
+
         rank = chain_manager.rank
         chain_path = experiment_path / f'chain_{rank}.npy'
         chain_path_flat = experiment_path / f'chain_{rank}_flat.npy'
@@ -111,7 +114,8 @@ def execute(config_path: str, results_path: str, experiment_id: Optional[str] = 
                 nwalkers, ndims,
                 logprob_fn=log_posterior,
                 pool=chain_manager.get_pool,
-                vectorize=True)
+                vectorize=True,
+                verbose=not quiet)
 
             start = 0.01 * np.random.uniform(0.0, 0.2,
                                              size=(nwalkers,
@@ -122,7 +126,12 @@ def execute(config_path: str, results_path: str, experiment_id: Optional[str] = 
                              nsteps,
                              callbacks=cb,
                              progress=not quiet)
-            if rank == 0 and cb:
+
+            end_timestamp = time.time()
+            if not quiet:
+                print(f"Chain {rank} took {end_timestamp - start_timestamp} seconds")
+
+            if rank == 0 and cb and not quiet:
                 print(f'R = {cb.estimates}')
             np.save(chain_path, sampler.get_chain())
             np.save(chain_path_flat, sampler.get_chain(flat=True, discard=0.5))

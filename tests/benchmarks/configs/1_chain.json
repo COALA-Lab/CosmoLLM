@@ -1,0 +1,22 @@
+{
+    "name": "quadratic_interpolate",
+    "nwalkers": 20,
+    "nsteps": 5000,
+    "nchains": 1,
+    "parametrization": {
+        "name": "quadratic",
+        "param_names": ["x1", "x2"]
+    },
+    "max_redshift": 1.0,
+    "cosmo": "default",
+    "fits_path": {
+        "fitres": "./Pantheon/data_fitres/Ancillary_G10.FITRES",
+        "sys": "./Pantheon/data_fitres/sys_full_long_G10.txt"
+    },
+    "truth_values": "data/hubbles.csv",
+    "priori": {
+        "matter": "gauss",
+        "hubble": "planck",
+        "density": "gaussian_around_one"
+    }
+}
