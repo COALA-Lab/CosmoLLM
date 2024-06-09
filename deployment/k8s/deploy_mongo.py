@@ -6,6 +6,8 @@ if __name__ == '__main__':
 import os
 from argparse import ArgumentParser
 
+from deployment.k8s.utils import create_namespace
+
 
 def execute(
     namespace: str,
@@ -13,6 +15,8 @@ def execute(
     mongo_user: str = "root",
     mongo_password: str = "root",
 ) -> None:
+    create_namespace(namespace)
+
     command = (
         f"helm install {release_name} "
         f"-n {namespace} "
