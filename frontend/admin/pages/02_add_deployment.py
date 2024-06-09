@@ -8,9 +8,9 @@ def main():
 
     new_view_instance(
         GUINode,
-        "This GUI node already exists!",
-        "Failed to add GUI node!",
-        "GUI node added!",
+        "This deployment already exists!",
+        "Failed to add deployment!",
+        "Deployment added!",
     )
 
 

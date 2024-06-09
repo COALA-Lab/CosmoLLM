@@ -8,9 +8,9 @@ def main():
 
     display_views(
         GUINode,
-        "It is forbidden to change the ID of a node!",
-        "Failed to update GUI node template!",
-        "GUI node template updated!",
+        "It is forbidden to change the ID of a deployment!",
+        "Failed to update deployment!",
+        "Deployment updated!",
     )
 
 

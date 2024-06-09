@@ -8,12 +8,12 @@ def main():
 
     delete_view_instance(
         GUINode,
-        "This GUI node does not exist!",
-        "The GUI node's ID is required!",
-        "Failed to delete GUI node!",
-        "GUI node deleted!",
-        "GUI node ID",
-        "Delete GUI node",
+        "This deployment does not exist!",
+        "The deployment's ID is required!",
+        "Failed to delete deployment!",
+        "Deployment deleted!",
+        "Deployment ID",
+        "Delete deployment",
     )
 
 
