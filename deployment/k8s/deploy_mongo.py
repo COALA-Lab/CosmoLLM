@@ -31,7 +31,7 @@ def execute(
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument(
-        '--namespace',
+        '-n', '--namespace',
         help="Namespace to deploy to",
         required=True,
     )
